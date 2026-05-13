@@ -1,4 +1,6 @@
 /* 公共样式 */
+
+/* 浅色主题（默认） */
 :root {
   --board-wood: #DEB887;
   --board-wood-light: #E8D4A8;
@@ -21,6 +23,29 @@
   --border-color: rgba(44, 24, 16, 0.15);
 }
 
+/* 深色主题 */
+[data-theme="dark"] {
+  --board-wood: #8B7355;
+  --board-wood-light: #A1887F;
+  --board-dark: #5D4037;
+  --line-color: #E0E0E0;
+  --stone-black: #2D2D2D;
+  --stone-black-highlight: #424242;
+  --stone-white: #EEEEEE;
+  --stone-white-shadow: #BDBDBD;
+  --accent-red: #EF5350;
+  --accent-gold: #FFD54F;
+  --bg-primary: #121212;
+  --bg-secondary: #1E1E1E;
+  --text-primary: #E0E0E0;
+  --text-secondary: #9E9E9E;
+  --success: #66BB6A;
+  --panel-bg: rgba(30, 30, 30, 0.95);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -29,6 +54,7 @@ body {
   min-height: 100vh;
   color: var(--text-primary);
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body::before {
@@ -40,6 +66,12 @@ body::before {
     radial-gradient(ellipse at 80% 80%, rgba(184, 134, 11, 0.08) 0%, transparent 50%);
   pointer-events: none;
   z-index: -1;
+}
+
+[data-theme="dark"] body::before {
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(139, 115, 85, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(184, 134, 11, 0.1) 0%, transparent 50%);
 }
 
 .container {
@@ -210,6 +242,41 @@ h1 {
 @keyframes toast-out {
   to { opacity: 0; transform: translateY(-20px); }
 }
+
+/* Spinner 加载动画 */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bg-secondary);
+  border-top-color: var(--accent-gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 主题切换按钮 */
+.theme-toggle {
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--accent-gold);
+  color: white;
+}
+
 
 /* 模态框 */
 .modal-overlay {

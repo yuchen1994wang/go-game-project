@@ -1,5 +1,45 @@
 // 公共工具函数
 
+// 主题管理
+const ThemeManager = {
+  THEME_KEY: 'go_theme',
+
+  init() {
+    const savedTheme = this.getTheme();
+    if (savedTheme) {
+      this.setTheme(savedTheme);
+    } else {
+      // 检测系统主题偏好
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      this.setTheme(prefersDark ? 'dark' : 'light');
+    }
+    // 监听系统主题变化
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem(this.THEME_KEY)) {
+        this.setTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  },
+
+  getTheme() {
+    return localStorage.getItem(this.THEME_KEY);
+  },
+
+  setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(this.THEME_KEY, theme);
+    // 更新所有主题切换按钮的图标
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+      btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    });
+  },
+
+  toggle() {
+    const current = this.getTheme();
+    this.setTheme(current === 'dark' ? 'light' : 'dark');
+  }
+};
+
 // Toast 提示
 function showToast(message, type = 'info') {
   const container = document.getElementById('toastContainer') || createToastContainer();

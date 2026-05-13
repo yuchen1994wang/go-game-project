@@ -434,6 +434,7 @@
         </div>
       </div>
       <div class="header-right">
+        <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
         <div class="game-info">
           <div class="player-names">
             <div class="player-name-display">
@@ -556,6 +557,12 @@
       }
 
       init() {
+        // 初始化主题
+        ThemeManager.init();
+        document.getElementById('themeToggle').addEventListener('click', () => {
+          ThemeManager.toggle();
+        });
+
         const settings = JSON.parse(sessionStorage.getItem('go_game_settings') || '{}');
         if (!settings.size) {
           window.location.href = 'setup.html';
