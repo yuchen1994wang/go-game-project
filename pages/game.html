@@ -95,11 +95,12 @@
       padding: 30px;
       box-shadow: var(--shadow-medium);
     }
-    
+
     .goban {
       position: relative;
       background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
       border-radius: 4px;
+      overflow: visible;
     }
     
     .board-grid {
@@ -157,17 +158,31 @@
       transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       z-index: 20;
     }
-    
+
     .stone.visible { transform: scale(1); }
-    
+
     .stone.black {
       background: radial-gradient(circle at 30% 30%, var(--stone-black-highlight), var(--stone-black) 60%);
       box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.4);
     }
-    
+
     .stone.white {
       background: radial-gradient(circle at 30% 30%, #ffffff, var(--stone-white) 50%, var(--stone-white-shadow) 100%);
       box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 最后落子标记 */
+    .stone.last-move::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-red);
+      box-shadow: 0 0 4px rgba(196, 30, 58, 0.6);
     }
     
     .control-panel {
@@ -340,6 +355,8 @@
       border-radius: 12px;
       border-left: 4px solid #667eea;
       display: none;
+      max-height: 300px;
+      overflow-y: auto;
     }
     .ai-result-panel.active { display: block; }
     .ai-result-title {
@@ -349,12 +366,17 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      position: sticky;
+      top: 0;
+      background: inherit;
+      padding-bottom: 4px;
     }
     .ai-result-content {
       font-size: 0.85rem;
       line-height: 1.6;
       color: var(--text-primary);
       white-space: pre-wrap;
+      word-break: break-word;
     }
     .ai-result-loading {
       display: flex;
@@ -543,7 +565,10 @@
     </div>
   </div>
 
-  <script src="../js/common.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/game.js"></script>
+  <script src="../js/ai.js"></script>
   <script>
     class GameApp {
       constructor() {
@@ -553,6 +578,7 @@
         this.timerInterval = null;
         this.isBoardSealed = false;
         this.confirmCallback = null;
+        this.renderedMoveCount = 0;
         this.init();
       }
 
@@ -577,6 +603,7 @@
         document.getElementById('whitePlayerName').textContent = this.game.whitePlayer;
 
         this.renderBoard();
+        this.renderCoords();
         this.updateUI();
         this.startTimer();
         this.bindEvents();
@@ -643,6 +670,56 @@
         }
       }
 
+      renderCoords() {
+        const goban = document.getElementById('goban');
+        const size = this.game.size;
+        const letters = 'ABCDEFGHJKLMNOPQRST'.split('');
+
+        // 顶部坐标 (A-T)
+        const topCoords = document.createElement('div');
+        topCoords.className = 'board-coords coord-top';
+        for (let i = 0; i < size; i++) {
+          const label = document.createElement('span');
+          label.className = 'coord-label';
+          label.textContent = letters[i] || '';
+          topCoords.appendChild(label);
+        }
+        goban.appendChild(topCoords);
+
+        // 底部坐标
+        const bottomCoords = document.createElement('div');
+        bottomCoords.className = 'board-coords coord-bottom';
+        for (let i = 0; i < size; i++) {
+          const label = document.createElement('span');
+          label.className = 'coord-label';
+          label.textContent = letters[i] || '';
+          bottomCoords.appendChild(label);
+        }
+        goban.appendChild(bottomCoords);
+
+        // 左侧坐标 (1-19)
+        const leftCoords = document.createElement('div');
+        leftCoords.className = 'board-coords coord-left';
+        for (let i = 0; i < size; i++) {
+          const label = document.createElement('span');
+          label.className = 'coord-label';
+          label.textContent = size - i;
+          leftCoords.appendChild(label);
+        }
+        goban.appendChild(leftCoords);
+
+        // 右侧坐标
+        const rightCoords = document.createElement('div');
+        rightCoords.className = 'board-coords coord-right';
+        for (let i = 0; i < size; i++) {
+          const label = document.createElement('span');
+          label.className = 'coord-label';
+          label.textContent = size - i;
+          rightCoords.appendChild(label);
+        }
+        goban.appendChild(rightCoords);
+      }
+
       getStarPoints(size) {
         const points = [];
         if (size === 9) {
@@ -665,32 +742,36 @@
 
       updateStones() {
         const size = this.game.size;
-        
+        const lastMove = this.game.moveHistory.length > 0
+          ? this.game.moveHistory[this.game.moveHistory.length - 1]
+          : null;
+
         for (let y = 0; y < size; y++) {
           for (let x = 0; x < size; x++) {
             const intersection = document.querySelector(`.intersection[data-x="${x}"][data-y="${y}"]`);
             if (!intersection) continue;
-            
+
             const existingStone = intersection.querySelector('.stone');
             const boardValue = this.game.board[y][x];
-            
+
             if (boardValue === 0) {
-              // 移除棋子
               if (existingStone) {
                 existingStone.classList.remove('visible');
                 setTimeout(() => existingStone.remove(), 200);
               }
             } else {
               const stoneColor = boardValue === 1 ? 'black' : 'white';
+              const isLastMove = lastMove && !lastMove.pass && lastMove.x === x && lastMove.y === y;
+
               if (existingStone) {
-                // 更新现有棋子颜色（如果需要）
-                if (!existingStone.classList.contains(stoneColor)) {
-                  existingStone.className = `stone ${stoneColor}`;
+                const needsUpdate = !existingStone.classList.contains(stoneColor)
+                  || isLastMove !== existingStone.classList.contains('last-move');
+                if (needsUpdate) {
+                  existingStone.className = `stone ${stoneColor}${isLastMove ? ' last-move' : ''}`;
                 }
               } else {
-                // 添加新棋子
                 const stone = document.createElement('div');
-                stone.className = `stone ${stoneColor}`;
+                stone.className = `stone ${stoneColor}${isLastMove ? ' last-move' : ''}`;
                 intersection.appendChild(stone);
                 requestAnimationFrame(() => stone.classList.add('visible'));
               }
@@ -710,7 +791,6 @@
 
         if (this.game.isGameOver) {
           document.getElementById('gameOverBanner').classList.add('active');
-          // 游戏结束后禁用封盘、悔棋、停一手按钮
           document.getElementById('undoBtn').disabled = true;
           document.getElementById('passBtn').disabled = true;
           document.getElementById('sealBoardBtn').disabled = true;
@@ -745,15 +825,18 @@
 
       updateMoveList() {
         const moveList = document.getElementById('moveList');
-        moveList.innerHTML = '';
+        const history = this.game.moveHistory;
 
-        this.game.moveHistory.forEach((move, index) => {
+        // 增量更新：只追加新增的项
+        for (let i = this.renderedMoveCount; i < history.length; i++) {
+          const move = history[i];
           const item = document.createElement('div');
           item.className = 'move-item';
+          item.dataset.index = i;
 
           const num = document.createElement('span');
           num.className = 'move-num';
-          num.textContent = index + 1;
+          num.textContent = i + 1;
 
           const stone = document.createElement('span');
           stone.className = `move-stone ${move.player === 1 ? 'black' : 'white'}`;
@@ -765,7 +848,14 @@
           item.appendChild(stone);
           item.appendChild(coord);
           moveList.appendChild(item);
-        });
+        }
+
+        this.renderedMoveCount = history.length;
+
+        // 悔棋时可能需要移除末尾项
+        while (moveList.children.length > history.length) {
+          moveList.lastChild.remove();
+        }
 
         moveList.scrollTop = moveList.scrollHeight;
       }
@@ -795,8 +885,6 @@
         document.getElementById('endGameBtn').addEventListener('click', () => this.endGame());
         document.getElementById('aiAnalyzeBtn').addEventListener('click', () => this.aiAnalyze());
         document.getElementById('backHomeBtn').addEventListener('click', () => this.backHome());
-
-
 
         document.getElementById('confirmCancel').addEventListener('click', () => this.hideConfirmModal());
         document.getElementById('confirmOk').addEventListener('click', () => {
@@ -829,6 +917,7 @@
 
       undo() {
         if (this.game.undo()) {
+          this.renderedMoveCount = this.game.moveHistory.length;
           this.updateStones();
           this.updateUI();
         }
@@ -855,6 +944,13 @@
 
         if (lastMove.pass) {
           showToast('Pass 无法点评', 'warning');
+          return;
+        }
+
+        // 检查API Key
+        const apiKey = AIAnalyzer.getApiKey();
+        if (!apiKey) {
+          showToast('请先配置 OpenRouter API Key（点击首页设置按钮）', 'warning');
           return;
         }
 
@@ -893,12 +989,10 @@
       }
 
       backHome() {
-        // 游戏已结束或没有棋步，直接返回首页
         if (this.game.isGameOver || this.game.moveHistory.length === 0) {
           window.location.href = 'home.html';
           return;
         }
-        // 游戏未结束且有棋步，需要确认
         this.showConfirm('返回首页', '当前对局尚未结束，返回首页后将对局将不会保存。确定要返回吗？', () => {
           window.location.href = 'home.html';
         });
@@ -941,6 +1035,13 @@
           return;
         }
 
+        // 检查API Key
+        const apiKey = AIAnalyzer.getApiKey();
+        if (!apiKey) {
+          showToast('请先配置 OpenRouter API Key（点击首页设置按钮）', 'warning');
+          return;
+        }
+
         const panel = document.getElementById('aiResultPanel');
         const content = document.getElementById('aiResultContent');
         panel.classList.add('active');
@@ -967,8 +1068,16 @@
       }
     }
 
+    // 防抖保存
+    GameApp.prototype.saveGame = debounce(GameApp.prototype.saveGame, 500);
+
     document.addEventListener('DOMContentLoaded', () => {
-      new GameApp();
+      try {
+        new GameApp();
+      } catch (error) {
+        console.error('游戏初始化失败:', error);
+        showErrorBoundary('游戏加载失败，请刷新页面重试');
+      }
     });
   </script>
 </body>

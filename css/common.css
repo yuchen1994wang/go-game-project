@@ -389,6 +389,119 @@ h1 {
 .history-vs { color: var(--text-secondary); font-size: 0.9rem; }
 .history-meta { display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary); }
 
+/* 棋盘坐标 */
+.board-coords {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--line-color);
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+}
+
+.coord-top, .coord-bottom {
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 30px;
+}
+
+.coord-top { top: 8px; }
+.coord-bottom { bottom: 8px; }
+
+.coord-left, .coord-right {
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px 0;
+}
+
+.coord-left { left: 8px; }
+.coord-right { right: 8px; }
+
+.coord-label {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 最后落子标记 */
+.stone.last-move::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-red);
+  box-shadow: 0 0 4px rgba(196, 30, 58, 0.6);
+}
+
+/* 错误边界遮罩 */
+.error-boundary {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 40px;
+  text-align: center;
+}
+
+.error-boundary.active {
+  display: flex;
+}
+
+.error-boundary-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.error-boundary-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.error-boundary-message {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.error-boundary-btn {
+  padding: 12px 32px;
+  background: var(--accent-gold);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.error-boundary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
 /* 响应式 */
 @media (max-width: 600px) {
   .container { padding: 20px 16px; }

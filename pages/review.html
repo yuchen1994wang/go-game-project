@@ -497,7 +497,10 @@
     </main>
   </div>
 
-  <script src="../js/common.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/game.js"></script>
+  <script src="../js/ai.js"></script>
   <script>
     class ReviewApp {
       constructor() {
@@ -508,11 +511,11 @@
         this.gameId = null;
         this.moveRatings = {};
         this.aiReviewResult = '';
+        this.moveListRendered = false;
         this.init();
       }
 
       init() {
-        // 初始化主题
         ThemeManager.init();
         document.getElementById('themeToggle').addEventListener('click', () => {
           ThemeManager.toggle();
@@ -571,12 +574,12 @@
         this.currentStep = this.game.moveHistory.length;
 
         this.renderBoard();
+        this.renderCoords();
         this.updateBoard();
         this.updateMoveList();
         this.updateTimelineInfo();
         this.bindEvents();
 
-        // 如果有已保存的AI复盘结果，直接展示；否则自动触发
         if (this.aiReviewResult) {
           document.getElementById('aiReviewContent').innerHTML = this.aiReviewResult.replace(/\n/g, '<br>');
         } else {
@@ -645,6 +648,52 @@
         }
       }
 
+      renderCoords() {
+        const goban = document.getElementById('goban');
+        const size = this.game.size;
+        const letters = 'ABCDEFGHJKLMNOPQRST'.split('');
+
+        const topCoords = document.createElement('div');
+        topCoords.className = 'board-coords coord-top';
+        for (let i = 0; i < size; i++) {
+          const label = document.createElement('span');
+          label.className = 'coord-label';
+          label.textContent = letters[i] || '';
+          topCoords.appendChild(label);
+        }
+        goban.appendChild(topCoords);
+
+        const bottomCoords = document.createElement('div');
+        bottomCoords.className = 'board-coords coord-bottom';
+        for (let i = 0; i < size; i++) {
+          const label = document.createElement('span');
+          label.className = 'coord-label';
+          label.textContent = letters[i] || '';
+          bottomCoords.appendChild(label);
+        }
+        goban.appendChild(bottomCoords);
+
+        const leftCoords = document.createElement('div');
+        leftCoords.className = 'board-coords coord-left';
+        for (let i = 0; i < size; i++) {
+          const label = document.createElement('span');
+          label.className = 'coord-label';
+          label.textContent = size - i;
+          leftCoords.appendChild(label);
+        }
+        goban.appendChild(leftCoords);
+
+        const rightCoords = document.createElement('div');
+        rightCoords.className = 'board-coords coord-right';
+        for (let i = 0; i < size; i++) {
+          const label = document.createElement('span');
+          label.className = 'coord-label';
+          label.textContent = size - i;
+          rightCoords.appendChild(label);
+        }
+        goban.appendChild(rightCoords);
+      }
+
       getStarPoints(size) {
         const points = [];
         if (size === 9) {
@@ -695,58 +744,69 @@
 
       updateMoveList() {
         const moveList = document.getElementById('moveList');
-        moveList.innerHTML = '';
 
-        this.game.moveHistory.forEach((move, index) => {
-          const item = document.createElement('div');
-          item.className = 'move-item';
-          if (index + 1 === this.currentStep) {
-            item.classList.add('active');
-          }
-
-          const num = document.createElement('span');
-          num.className = 'move-num';
-          num.textContent = index + 1;
-
-          const stone = document.createElement('span');
-          stone.className = `move-stone ${move.player === 1 ? 'black' : 'white'}`;
-
-          const coord = document.createElement('span');
-          coord.textContent = move.pass ? 'Pass' : `${String.fromCharCode(65 + move.x)}${this.game.size - move.y}`;
-
-          item.appendChild(num);
-          item.appendChild(stone);
-          item.appendChild(coord);
-
-          if (this.moveRatings[index]) {
-            const rating = document.createElement('span');
-            rating.className = 'move-rating';
-            const score = this.moveRatings[index].score;
-            rating.textContent = score > 0 ? `+${score}` : score;
-
-            if (score >= 50) rating.classList.add('rating-excellent');
-            else if (score >= 20) rating.classList.add('rating-good');
-            else if (score >= 0) rating.classList.add('rating-ok');
-            else rating.classList.add('rating-bad');
-
-            item.appendChild(rating);
-          }
-
-          item.addEventListener('click', () => {
-            this.currentStep = index + 1;
-            this.updateBoard();
-            this.updateMoveList();
-            this.updateTimelineInfo();
-            this.showMoveDetail(index);
+        if (!this.moveListRendered) {
+          moveList.innerHTML = '';
+          this.game.moveHistory.forEach((move, index) => {
+            const item = this.createMoveItem(move, index);
+            moveList.appendChild(item);
           });
+          this.moveListRendered = true;
+        }
 
-          moveList.appendChild(item);
+        // 只更新 active 状态
+        moveList.querySelectorAll('.move-item').forEach((item, index) => {
+          item.classList.toggle('active', index + 1 === this.currentStep);
         });
 
         const activeItem = moveList.querySelector('.move-item.active');
         if (activeItem) {
           activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+      }
+
+      createMoveItem(move, index) {
+        const item = document.createElement('div');
+        item.className = 'move-item';
+        item.dataset.index = index;
+
+        const num = document.createElement('span');
+        num.className = 'move-num';
+        num.textContent = index + 1;
+
+        const stone = document.createElement('span');
+        stone.className = `move-stone ${move.player === 1 ? 'black' : 'white'}`;
+
+        const coord = document.createElement('span');
+        coord.textContent = move.pass ? 'Pass' : `${String.fromCharCode(65 + move.x)}${this.game.size - move.y}`;
+
+        item.appendChild(num);
+        item.appendChild(stone);
+        item.appendChild(coord);
+
+        if (this.moveRatings[index]) {
+          const rating = document.createElement('span');
+          rating.className = 'move-rating';
+          const score = this.moveRatings[index].score;
+          rating.textContent = score > 0 ? `+${score}` : score;
+
+          if (score >= 50) rating.classList.add('rating-excellent');
+          else if (score >= 20) rating.classList.add('rating-good');
+          else if (score >= 0) rating.classList.add('rating-ok');
+          else rating.classList.add('rating-bad');
+
+          item.appendChild(rating);
+        }
+
+        item.addEventListener('click', () => {
+          this.currentStep = index + 1;
+          this.updateBoard();
+          this.updateMoveList();
+          this.updateTimelineInfo();
+          this.showMoveDetail(index);
+        });
+
+        return item;
       }
 
       updateTimelineInfo() {
@@ -777,7 +837,7 @@
           }
         } else {
           scoreEl.textContent = '';
-          contentEl.innerHTML = '<p style="color:var(--text-secondary)">暂无评分，点击"评分当前手"按钮获取AI评价</p>';
+          contentEl.innerHTML = '<p style="color:var(--text-secondary)">暂无评分，点击"评价这手"按钮获取AI评价</p>';
         }
       }
 
@@ -833,7 +893,6 @@
 
         document.getElementById('rateMoveBtn').addEventListener('click', () => this.rateCurrentMove());
 
-        // AI复盘面板折叠/展开
         document.getElementById('aiReviewHeader').addEventListener('click', () => {
           const panel = document.getElementById('aiReviewPanel');
           panel.classList.toggle('collapsed');
@@ -851,7 +910,6 @@
           this.aiReviewResult = analysis;
           content.innerHTML = analysis.replace(/\n/g, '<br>');
 
-          // 保存AI复盘结果到历史记录
           const history = Storage.getHistory();
           const gameIndex = history.findIndex(g => g.id === this.gameId);
           if (gameIndex >= 0) {
@@ -900,7 +958,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      new ReviewApp();
+      try {
+        new ReviewApp();
+      } catch (error) {
+        console.error('复盘页面初始化失败:', error);
+        showErrorBoundary('复盘页面加载失败，请刷新页面重试');
+      }
     });
   </script>
 </body>
