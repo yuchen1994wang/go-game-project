@@ -457,6 +457,7 @@
       </div>
       <div class="header-right">
         <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
+        <button class="btn btn-secondary" id="settingsBtn" title="设置" style="padding: 8px 14px; font-size: 0.85rem;">⚙️ 设置</button>
         <div class="game-info">
           <div class="player-names">
             <div class="player-name-display">
@@ -561,6 +562,47 @@
       <div class="confirm-actions">
         <button class="btn btn-secondary" id="confirmCancel">取消</button>
         <button class="btn btn-danger" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置弹窗 -->
+  <div class="modal-overlay" id="settingsModal" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">设置</h3>
+        <button class="modal-close" id="closeSettings">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">主题</label>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+            <button class="btn btn-secondary" id="themeToggleBtn" style="padding: 8px 16px;">
+              🌙 深色
+            </button>
+            <span id="themeStatus" style="font-size: 0.85rem; color: var(--text-secondary);">当前为深色主题</span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 20px;">
+          <label class="form-label">OpenRouter API Key</label>
+          <input type="password" class="form-input" id="apiKeyInput" placeholder="输入你的 OpenRouter API Key">
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px;">用于AI复盘和评分功能。Key仅存储在本地浏览器中。</p>
+          <div id="apiStatus" style="margin-top: 8px; font-size: 0.85rem;"></div>
+        </div>
+        <div class="form-group" style="margin-top: 20px;">
+          <label class="form-label">音效设置</label>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+            <button class="btn btn-secondary" id="soundToggleBtn" style="padding: 8px 16px;">
+              🔊 开启
+            </button>
+            <span id="soundStatus" style="font-size: 0.85rem; color: var(--text-secondary);">落子、提子、胜利时播放音效</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="testSettings">测试</button>
+        <button class="btn btn-secondary" id="cancelSettings">取消</button>
+        <button class="btn btn-primary" id="saveSettings">保存</button>
       </div>
     </div>
   </div>
@@ -764,10 +806,11 @@
               const isLastMove = lastMove && !lastMove.pass && lastMove.x === x && lastMove.y === y;
 
               if (existingStone) {
-                const needsUpdate = !existingStone.classList.contains(stoneColor)
-                  || isLastMove !== existingStone.classList.contains('last-move');
+                const hasCorrectColor = existingStone.classList.contains(stoneColor);
+                const hasLastMove = existingStone.classList.contains('last-move');
+                const needsUpdate = !hasCorrectColor || isLastMove !== hasLastMove;
                 if (needsUpdate) {
-                  existingStone.className = `stone ${stoneColor}${isLastMove ? ' last-move' : ''}`;
+                  existingStone.className = `stone ${stoneColor}${isLastMove ? ' last-move' : ''} visible`;
                 }
               } else {
                 const stone = document.createElement('div');
@@ -893,6 +936,123 @@
             this.confirmCallback = null;
           }
           this.hideConfirmModal();
+        });
+
+        this.initSettings();
+      }
+
+      initSettings() {
+        const modal = document.getElementById('settingsModal');
+        const btn = document.getElementById('settingsBtn');
+        const close = document.getElementById('closeSettings');
+        const cancel = document.getElementById('cancelSettings');
+        const save = document.getElementById('saveSettings');
+        const testBtn = document.getElementById('testSettings');
+        const input = document.getElementById('apiKeyInput');
+        const statusEl = document.getElementById('apiStatus');
+
+        const updateStatus = (key) => {
+          if (key) {
+            statusEl.innerHTML = '<span style="color: #2E7D32;">✓ Key已配置</span>';
+          } else {
+            statusEl.innerHTML = '<span style="color: #666;">未配置API Key</span>';
+          }
+        };
+
+        const savedKey = AIAnalyzer.getApiKey();
+        input.value = savedKey;
+        updateStatus(savedKey);
+
+        btn.addEventListener('click', () => {
+          modal.style.display = 'flex';
+          const key = AIAnalyzer.getApiKey();
+          input.value = key;
+          updateStatus(key);
+        });
+
+        const hideModal = () => modal.style.display = 'none';
+        close.addEventListener('click', hideModal);
+        cancel.addEventListener('click', hideModal);
+
+        testBtn.addEventListener('click', async () => {
+          const key = input.value.trim();
+          if (!key) {
+            showToast('请先输入 API Key', 'warning');
+            return;
+          }
+          testBtn.disabled = true;
+          testBtn.textContent = '测试中...';
+          statusEl.innerHTML = '<span style="color: #1976D2;">正在测试连接...</span>';
+
+          try {
+            const response = await fetch('https://openrouter.ai/api/v1/models', {
+              headers: { 'Authorization': `Bearer ${key}` }
+            });
+            if (response.ok) {
+              statusEl.innerHTML = '<span style="color: #2E7D32;">✓ 连接成功！</span>';
+              showToast('API Key 验证成功', 'success');
+            } else {
+              const data = await response.json().catch(() => ({}));
+              throw new Error(data.error?.message || `HTTP ${response.status}`);
+            }
+          } catch (error) {
+            statusEl.innerHTML = `<span style="color: #C62828;">✗ 连接失败: ${error.message}</span>`;
+            showToast('API Key 验证失败', 'error');
+          } finally {
+            testBtn.disabled = false;
+            testBtn.textContent = '测试';
+          }
+        });
+
+        // 主题切换
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeStatus = document.getElementById('themeStatus');
+
+        const updateThemeUI = () => {
+          const isDark = ThemeManager.getTheme() === 'dark';
+          themeToggleBtn.textContent = isDark ? '☀️ 浅色' : '🌙 深色';
+          themeStatus.textContent = isDark ? '当前为深色主题' : '当前为浅色主题';
+        };
+
+        themeToggleBtn.addEventListener('click', () => {
+          ThemeManager.toggle();
+          updateThemeUI();
+          showToast(ThemeManager.getTheme() === 'dark' ? '已切换为深色主题' : '已切换为浅色主题', 'info');
+        });
+
+        updateThemeUI();
+
+        // 音效开关
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+        const soundStatus = document.getElementById('soundStatus');
+
+        const updateSoundUI = () => {
+          const enabled = SoundManager.isEnabled();
+          soundToggleBtn.textContent = enabled ? '🔊 开启' : '🔇 关闭';
+          soundStatus.textContent = enabled ? '落子、提子、胜利时播放音效' : '音效已关闭';
+        };
+
+        soundToggleBtn.addEventListener('click', () => {
+          SoundManager.toggle();
+          updateSoundUI();
+          showToast(SoundManager.isEnabled() ? '音效已开启' : '音效已关闭', 'info');
+        });
+
+        updateSoundUI();
+
+        save.addEventListener('click', () => {
+          const key = input.value.trim();
+          AIAnalyzer.setApiKey(key);
+          if (key) {
+            showToast('API Key 已保存', 'success');
+          } else {
+            showToast('API Key 已清除', 'info');
+          }
+          hideModal();
+        });
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) hideModal();
         });
       }
 
@@ -1068,8 +1228,11 @@
       }
     }
 
-    // 防抖保存
-    GameApp.prototype.saveGame = debounce(GameApp.prototype.saveGame, 500);
+    // 防抖保存（保持this绑定）
+    const originalSaveGame = GameApp.prototype.saveGame;
+    GameApp.prototype.saveGame = function(...args) {
+      return debounce(() => originalSaveGame.apply(this, args), 500)();
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       try {

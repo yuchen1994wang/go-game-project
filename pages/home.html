@@ -379,6 +379,15 @@
           <div id="apiStatus" style="margin-top: 8px; font-size: 0.85rem;"></div>
         </div>
         <div class="form-group" style="margin-top: 20px;">
+          <label class="form-label">主题</label>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+            <button class="btn btn-secondary" id="themeToggleBtn" style="padding: 8px 16px;">
+              🌙 深色
+            </button>
+            <span id="themeStatus" style="font-size: 0.85rem; color: var(--text-secondary);">当前为深色主题</span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 20px;">
           <label class="form-label">音效设置</label>
           <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
             <button class="btn btn-secondary" id="soundToggleBtn" style="padding: 8px 16px;">
@@ -493,8 +502,26 @@
           updateSoundUI();
           showToast(SoundManager.isEnabled() ? '音效已开启' : '音效已关闭', 'info');
         });
-        
+
         updateSoundUI();
+
+        // 主题切换
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeStatus = document.getElementById('themeStatus');
+
+        const updateThemeUI = () => {
+          const isDark = ThemeManager.getTheme() === 'dark';
+          themeToggleBtn.textContent = isDark ? '☀️ 浅色' : '🌙 深色';
+          themeStatus.textContent = isDark ? '当前为深色主题' : '当前为浅色主题';
+        };
+
+        themeToggleBtn.addEventListener('click', () => {
+          ThemeManager.toggle();
+          updateThemeUI();
+          showToast(ThemeManager.getTheme() === 'dark' ? '已切换为深色主题' : '已切换为浅色主题', 'info');
+        });
+
+        updateThemeUI();
 
         save.addEventListener('click', () => {
           const key = input.value.trim();
