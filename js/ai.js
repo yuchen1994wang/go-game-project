@@ -81,27 +81,8 @@ SGF棋谱：${sgf}
       return data.choices[0].message.content;
     } catch (error) {
       console.error('AI分析失败:', error.message || error);
-      return this.localAnalysis(game);
+      throw error;
     }
-  }
-
-  static localAnalysis(game) {
-    const moveCount = game.moveHistory.length;
-    const captures = game.moveHistory.reduce((sum, m) => sum + (m.captured ? m.captured.length : 0), 0);
-
-    let analysis = `## 本地分析\n\n本局共进行了${moveCount}手，总提子数为${captures}。\n\n`;
-    if (moveCount < 20) {
-      analysis += `对局尚在布局阶段，双方正在争夺角部和边部的要点。建议注意棋子的效率和配合。\n`;
-    } else if (moveCount < 80) {
-      analysis += `对局进入中盘阶段，战斗逐渐激烈。建议关注厚薄判断和攻防转换的时机。\n`;
-    } else {
-      analysis += `对局已进入后半盘，官子阶段需要精确计算。建议注意大小官子的价值判断。\n`;
-    }
-    if (captures > 5) {
-      analysis += `\n本局战斗激烈，共有${captures}个子被提掉。建议在攻击对方时注意自身棋子的安全。\n`;
-    }
-    analysis += `\n当前为离线分析模式，联网后可获得AI深度分析。`;
-    return analysis;
   }
 
   static async rateMove(game, moveIndex) {
