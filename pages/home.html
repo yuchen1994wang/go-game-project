@@ -651,6 +651,7 @@
           <div class="history-player">
             <span class="player-indicator black"></span>
             <span>${game.blackPlayer || '黑方'}</span>
+            ${game.type === 'ai' ? '<span class="ai-badge">🤖 AI</span>' : ''}
           </div>
           <span class="history-vs">VS</span>
           <div class="history-player">
