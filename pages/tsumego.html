@@ -114,16 +114,6 @@
         <div class="step-hint" id="stepHint"></div>
 
         <div class="filter-section">
-          <div class="filter-label">📁 位置筛选</div>
-          <div class="filter-buttons" id="locationFilters">
-            <button class="filter-btn active" data-location="全部">全部</button>
-            <button class="filter-btn" data-location="角部">角部</button>
-            <button class="filter-btn" data-location="边路">边路</button>
-            <button class="filter-btn" data-location="中腹">中腹</button>
-          </div>
-        </div>
-
-        <div class="filter-section">
           <button class="btn btn-danger" id="wrongListBtn" style="padding: 10px 16px; font-size: 0.9rem;">📚 错题本 (<span id="wrongCount">0</span>)</button>
         </div>
 
@@ -503,7 +493,7 @@
       }
 
       handleClick(x, y) {
-        if (this.isFinished || this.showedAnswer) return;
+        if (this.isFinished) return;
 
         const intersection = document.querySelector('.intersection[data-x="' + x + '"][data-y="' + y + '"]');
         if (!intersection || intersection.querySelector('.stone')) return;
@@ -656,6 +646,8 @@
         this.showedAnswer = true;
         this.pauseTimer();
         
+        document.getElementById('resultPanel').className = 'result-panel';
+        
         if (this.isMultiStepProblem()) {
           let answerText = '答案：\n';
           this.problem.steps.forEach((step, i) => {
@@ -663,12 +655,23 @@
             this.placeStone(move.x, move.y, 'black', true);
             answerText += `第${i+1}步：(${move.x}, ${move.y}) - ${step.solution}\n`;
           });
-          this.showResult(true, answerText);
+          this.showAnswerPanel(answerText);
         } else {
           const correct = this.problem.correctMoves[0];
           this.placeStone(correct.x, correct.y, 'black', true);
-          this.showResult(true, this.problem.solution);
+          this.showAnswerPanel(this.problem.solution);
         }
+      }
+
+      showAnswerPanel(message) {
+        const panel = document.getElementById('resultPanel');
+        panel.className = 'result-panel';
+        panel.style.display = 'block';
+        panel.style.background = '#E3F2FD';
+        panel.style.borderLeft = '4px solid #1976D2';
+        document.getElementById('resultTitle').textContent = '📖 答案';
+        document.getElementById('resultTitle').style.color = '#1976D2';
+        document.getElementById('resultContent').textContent = message;
       }
 
       showWrongList() {
