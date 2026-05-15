@@ -35,7 +35,7 @@
     .star-point { fill: var(--line-color); opacity: 0.8; }
     .intersection { position: absolute; width: 40px; height: 40px; transform: translate(-50%, -50%); cursor: pointer; z-index: 10; }
     .intersection:hover::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 36px; height: 36px; border-radius: 50%; background: rgba(102, 126, 234, 0.3); pointer-events: none; }
-    .stone { width: 36px; height: 36px; border-radius: 50%; position: absolute; transform: scale(0); transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 20; pointer-events: none; }
+    .stone { width: 36px; height: 36px; border-radius: 50%; position: absolute; transform: scale(0); transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 5; pointer-events: none; }
     .stone.visible { transform: scale(1); }
     .stone.black { background: radial-gradient(circle at 30% 30%, var(--stone-black-highlight), var(--stone-black) 60%); box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.4); }
     .stone.white { background: radial-gradient(circle at 30% 30%, #ffffff, var(--stone-white) 50%, var(--stone-white-shadow) 100%); box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1); }
@@ -633,7 +633,7 @@
       }
 
       reset() {
-        this.userMoves.forEach(move => this.removeStoneWithAnimation(move.x, move.y));
+        this.userMoves.forEach(move => this.removeStone(move.x, move.y));
         this.userMoves = [];
 
         this.autoStones.forEach(move => this.removeStone(move.x, move.y));
@@ -647,6 +647,9 @@
 
         document.getElementById('resultPanel').className = 'result-panel';
         document.getElementById('hintPanel').classList.remove('visible');
+
+        // 重新放置初始棋子
+        this.placeSetupStones();
 
         this.resetTimer();
         this.startTimer();
@@ -717,7 +720,17 @@
 
       bindEvents() {
         document.getElementById('goban').addEventListener('click', (e) => {
-          const intersection = e.target.closest('.intersection');
+          // 直接找最近的intersection元素
+          let target = e.target;
+          let intersection = null;
+          while (target && target !== document.getElementById('goban')) {
+            if (target.classList.contains('intersection')) {
+              intersection = target;
+              break;
+            }
+            target = target.parentElement;
+          }
+          
           if (intersection) {
             const x = parseInt(intersection.dataset.x);
             const y = parseInt(intersection.dataset.y);

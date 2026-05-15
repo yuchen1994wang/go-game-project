@@ -315,6 +315,12 @@ class GoGame {
       const move = this.moveHistory[i];
       if (!move.pass) {
         tempBoard[move.y][move.x] = move.player;
+        // 吃子处理：移除被吃掉的棋子
+        if (move.captured && move.captured.length > 0) {
+          for (const stone of move.captured) {
+            tempBoard[stone.y][stone.x] = 0;
+          }
+        }
       }
     }
 
