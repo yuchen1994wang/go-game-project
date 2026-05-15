@@ -534,6 +534,94 @@ const TsumegoData = {
       solution: "角部八目的要点在 (1,1)！点在中心，白棋无法做出两只眼。",
       wrongMoveHint: "角部八目的要点在中心，找到棋形的中心点。",
       hint: "角部八目是经典死活！要点在中心。请尝试点击 (1,1) 位置！"
+    },
+    // ============ 多步题 ============
+    {
+      id: 31,
+      title: "相思断·续",
+      difficulty: "高级",
+      location: "边路",
+      type: "kill",
+      description: "黑先，两步杀棋",
+      size: 6,
+      steps: [
+        {
+          description: "第一步：切断白棋联络",
+          correctMoves: [{x: 3, y: 0}],
+          solution: "相思断的第一步！点在(3,0)位置切断白棋联络。",
+          afterMoves: { white: [[1,2], [2,2]] }
+        },
+        {
+          description: "第二步：叫吃",
+          correctMoves: [{x: 1, y: 1}],
+          solution: "叫吃！白棋被切断后只剩一口气，可以吃掉。",
+          afterMoves: { white: [[2,2]] }
+        }
+      ],
+      correctMoves: [{x: 3, y: 0}],
+      solution: "相思断两步杀！先切断再叫吃。",
+      wrongMoveHint: "先找切断的要点，再找叫吃的点。",
+      hint: "这是两步题！第一步切断白棋联络，第二步叫吃。请仔细计算两步的变化！"
+    },
+    {
+      id: 32,
+      title: "倒扑三步",
+      difficulty: "高级",
+      location: "边路",
+      type: "kill",
+      description: "黑先，三步杀棋",
+      size: 6,
+      steps: [
+        {
+          description: "第一步：扑入",
+          correctMoves: [{x: 1, y: 0}],
+          solution: "第一步扑入！虽然会被吃，但为后续做准备。",
+          afterMoves: { white: [[0,1], [2,2], [3,1]] }
+        },
+        {
+          description: "第二步：叫吃",
+          correctMoves: [{x: 2, y: 1}],
+          solution: "叫吃！白棋气紧，无法接回。",
+          afterMoves: { white: [[0,1], [3,1]] }
+        },
+        {
+          description: "第三步：提子",
+          correctMoves: [{x: 1, y: 1}],
+          solution: "提掉白子！通过倒扑吃掉白棋整块。",
+          afterMoves: {}
+        }
+      ],
+      correctMoves: [{x: 1, y: 0}],
+      solution: "倒扑三步杀！扑入→叫吃→提子。",
+      wrongMoveHint: "倒扑需要三步：先扑，再叫吃，最后提子。",
+      hint: "这是三步题！经典的倒扑手筋。请计算每一步的变化！"
+    },
+    {
+      id: 33,
+      title: "金鸡独立两步",
+      difficulty: "中级",
+      location: "边路",
+      type: "kill",
+      description: "黑先，两步杀棋",
+      size: 5,
+      steps: [
+        {
+          description: "第一步：紧气",
+          correctMoves: [{x: 2, y: 1}],
+          solution: "紧气！让白棋气更紧。",
+          afterMoves: { white: [[1,1], [1,2], [2,2]] }
+        },
+        {
+          description: "第二步：叫吃",
+          correctMoves: [{x: 3, y: 0}],
+          solution: "金鸡独立！利用边线，白棋两边不能入气。",
+          afterMoves: {}
+        }
+      ],
+      correctMoves: [{x: 2, y: 1}],
+      solution: "金鸡独立两步杀！先紧气再利用边线特性。",
+      wrongMoveHint: "先紧气，再利用边线。",
+      hint: "这是两步题！利用金鸡独立的手筋，先紧气再叫吃。一步一步来！"
     }
   ]
 };

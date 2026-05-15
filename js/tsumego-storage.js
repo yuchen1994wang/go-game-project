@@ -3,6 +3,7 @@ const TsumegoStorage = {
   PROGRESS_KEY: 'go_tsumego_progress',
   WRONG_KEY: 'go_tsumego_wrong',
   BEST_KEY: 'go_tsumego_best',
+  BEST_STEPS_KEY: 'go_tsumego_best_steps',
 
   // 保存当前题目进度
   saveProgress(problemId, state) {
@@ -100,6 +101,35 @@ const TsumegoStorage = {
     return best[problemId];
   },
 
+  // 保存最佳步数（多步题用）
+  saveBestSteps(problemId, steps) {
+    try {
+      const best = this.getBestSteps();
+      if (!best[problemId] || steps < best[problemId]) {
+        best[problemId] = steps;
+        localStorage.setItem(this.BEST_STEPS_KEY, JSON.stringify(best));
+      }
+    } catch (e) {
+      console.error('Failed to save best steps:', e);
+    }
+  },
+
+  // 获取所有最佳步数
+  getBestSteps() {
+    try {
+      const data = localStorage.getItem(this.BEST_STEPS_KEY);
+      return data ? JSON.parse(data) : {};
+    } catch {
+      return {};
+    }
+  },
+
+  // 获取单个题目最佳步数
+  getBestSteps(problemId) {
+    const best = this.getBestSteps();
+    return best[problemId];
+  },
+
   // 格式化时间显示
   formatTime(ms) {
     if (!ms) return '--';
@@ -117,5 +147,6 @@ const TsumegoStorage = {
     localStorage.removeItem(this.PROGRESS_KEY);
     localStorage.removeItem(this.WRONG_KEY);
     localStorage.removeItem(this.BEST_KEY);
+    localStorage.removeItem(this.BEST_STEPS_KEY);
   }
 };
