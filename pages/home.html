@@ -574,8 +574,9 @@
         });
 
         document.getElementById('clearAllBtn').addEventListener('click', () => {
-          if (confirm('确定要清除所有缓存吗？这将删除对局记录、练习统计、API Key、主题和音效设置。')) {
+          if (confirm('确定要清除所有缓存吗？这将删除对局记录、练习统计、API Key、用户信息、主题和音效设置。')) {
             Storage.clearHistory();
+            localStorage.removeItem('go_username');
             localStorage.removeItem('go_tsumego_stats');
             localStorage.removeItem('openrouter_api_key');
             localStorage.removeItem('go_theme');
