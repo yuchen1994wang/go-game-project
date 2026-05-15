@@ -464,6 +464,13 @@
         const intersection = document.querySelector('.intersection[data-x="' + x + '"][data-y="' + y + '"]');
         if (!intersection) return;
         const stone = intersection.querySelector('.stone');
+        if (stone) stone.remove();
+      }
+
+      removeStoneWithAnimation(x, y) {
+        const intersection = document.querySelector('.intersection[data-x="' + x + '"][data-y="' + y + '"]');
+        if (!intersection) return;
+        const stone = intersection.querySelector('.stone');
         if (stone) {
           stone.classList.remove('visible');
           setTimeout(() => stone.remove(), 200);
@@ -623,7 +630,7 @@
       }
 
       reset() {
-        this.userMoves.forEach(move => this.removeStone(move.x, move.y));
+        this.userMoves.forEach(move => this.removeStoneWithAnimation(move.x, move.y));
         this.userMoves = [];
 
         this.autoStones.forEach(move => this.removeStone(move.x, move.y));
