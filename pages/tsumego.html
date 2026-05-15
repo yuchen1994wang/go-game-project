@@ -70,9 +70,6 @@
     .hint-panel { margin-top: 16px; padding: 12px 16px; background: #FFF8E1; border-radius: 10px; border-left: 4px solid var(--accent-gold); display: none; }
     .hint-panel.visible { display: block; }
     .navigation { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); }
-    .filter-section { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
-    .filter-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
-    .filter-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
     .filter-btn { padding: 6px 14px; font-size: 0.85rem; border-radius: 20px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background: var(--accent-gold); color: white; border-color: var(--accent-gold); }
     .filter-btn:hover { opacity: 0.9; }
@@ -113,7 +110,7 @@
         <div class="step-indicator" id="stepIndicator"></div>
         <div class="step-hint" id="stepHint"></div>
 
-        <div class="filter-section">
+        <div style="margin-bottom: 16px;">
           <button class="btn btn-danger" id="wrongListBtn" style="padding: 10px 16px; font-size: 0.9rem;">📚 错题本 (<span id="wrongCount">0</span>)</button>
         </div>
 
@@ -231,6 +228,7 @@
         this.showedHint = false;
         this.showedAnswer = false;
         this.userMoves = [];
+        this.autoStones = [];
         this.currentLocation = '全部';
         this.timerStart = 0;
         this.timerInterval = null;
@@ -312,6 +310,7 @@
         this.showedHint = false;
         this.showedAnswer = false;
         this.userMoves = [];
+        this.autoStones = [];
         this.totalSteps = this.isMultiStepProblem() ? this.problem.steps.length : 1;
         this.completedSteps = 0;
         
@@ -516,6 +515,7 @@
             if (stepInfo.afterMoves && stepInfo.afterMoves.white) {
               stepInfo.afterMoves.white.forEach(([wx, wy]) => {
                 this.placeStone(wx, wy, 'white', true);
+                this.autoStones.push({x: wx, y: wy});
               });
             }
             
@@ -625,19 +625,22 @@
       reset() {
         this.userMoves.forEach(move => this.removeStone(move.x, move.y));
         this.userMoves = [];
-        
+
+        this.autoStones.forEach(move => this.removeStone(move.x, move.y));
+        this.autoStones = [];
+
         this.currentStep = 0;
         this.isFinished = false;
         this.showedHint = false;
         this.showedAnswer = false;
         this.completedSteps = 0;
-        
+
         document.getElementById('resultPanel').className = 'result-panel';
         document.getElementById('hintPanel').classList.remove('visible');
-        
+
         this.resetTimer();
         this.startTimer();
-        
+
         this.updateUI();
         showToast('已重置', 'info');
       }
@@ -645,20 +648,22 @@
       showAnswer() {
         this.showedAnswer = true;
         this.pauseTimer();
-        
+
         document.getElementById('resultPanel').className = 'result-panel';
-        
+
         if (this.isMultiStepProblem()) {
           let answerText = '答案：\n';
           this.problem.steps.forEach((step, i) => {
             const move = step.correctMoves[0];
             this.placeStone(move.x, move.y, 'black', true);
+            this.autoStones.push({x: move.x, y: move.y});
             answerText += `第${i+1}步：(${move.x}, ${move.y}) - ${step.solution}\n`;
           });
           this.showAnswerPanel(answerText);
         } else {
           const correct = this.problem.correctMoves[0];
           this.placeStone(correct.x, correct.y, 'black', true);
+          this.autoStones.push({x: correct.x, y: correct.y});
           this.showAnswerPanel(this.problem.solution);
         }
       }
@@ -732,13 +737,7 @@
         document.getElementById('resetBtn').addEventListener('click', () => this.reset());
         document.getElementById('answerBtn').addEventListener('click', () => this.showAnswer());
         document.getElementById('wrongListBtn').addEventListener('click', () => this.showWrongList());
-        
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            this.setLocationFilter(btn.dataset.location);
-          });
-        });
-        
+
         document.getElementById('prevBtn').addEventListener('click', () => {
           const filtered = this.getFilteredProblems();
           const idx = filtered.findIndex(p => p.id === this.problemId);
