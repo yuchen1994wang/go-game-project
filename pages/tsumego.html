@@ -320,7 +320,12 @@
         this.resetTimer();
         this.startTimer();
         
-        document.getElementById('resultPanel').className = 'result-panel';
+        const resultPanel = document.getElementById('resultPanel');
+        resultPanel.className = 'result-panel';
+        resultPanel.style.display = '';
+        resultPanel.style.background = '';
+        resultPanel.style.borderLeft = '';
+        document.getElementById('resultTitle').style.color = '';
         document.getElementById('hintPanel').classList.remove('visible');
         
         this.renderBoard();
@@ -665,7 +670,12 @@
         this.showedAnswer = false;
         this.completedSteps = 0;
 
-        document.getElementById('resultPanel').className = 'result-panel';
+        const resultPanel = document.getElementById('resultPanel');
+        resultPanel.className = 'result-panel';
+        resultPanel.style.display = '';
+        resultPanel.style.background = '';
+        resultPanel.style.borderLeft = '';
+        document.getElementById('resultTitle').style.color = '';
         document.getElementById('hintPanel').classList.remove('visible');
 
         // 重新放置初始棋子
