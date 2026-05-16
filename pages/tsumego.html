@@ -447,7 +447,10 @@
 
       placeStone(x, y, color, animate = true, className = '') {
         const intersection = document.querySelector('.intersection[data-x="' + x + '"][data-y="' + y + '"]');
-        if (!intersection) return;
+        if (!intersection) {
+          console.log('placeStone: no intersection found at', x, y);
+          return;
+        }
 
         const existingStone = intersection.querySelector('.stone');
         if (existingStone) existingStone.remove();
@@ -457,7 +460,7 @@
         intersection.appendChild(stone);
         
         if (animate) {
-          requestAnimationFrame(() => stone.classList.add('visible'));
+          setTimeout(() => stone.classList.add('visible'), 10);
         } else {
           stone.classList.add('visible');
         }
@@ -513,6 +516,11 @@
           console.log('Rejected: no intersection found');
           return;
         }
+        
+        // 先移除预览棋子
+        const previewStone = intersection.querySelector('.stone.preview');
+        if (previewStone) previewStone.remove();
+        
         if (intersection.querySelector('.stone')) {
           console.log('Rejected: stone already exists');
           return;
@@ -733,26 +741,17 @@
       bindEvents() {
         const goban = document.getElementById('goban');
         
-        // 测试 goban 是否可点击
+        // 使用事件委托处理 intersection 点击
         goban.addEventListener('click', (e) => {
-          console.log('Goban clicked', e.target.className, e.target.tagName);
-        });
-        
-        goban.addEventListener('click', (e) => {
-          // 使用 closest 方法查找 intersection
           const intersection = e.target.closest('.intersection');
-          
           if (intersection) {
             const x = parseInt(intersection.dataset.x);
             const y = parseInt(intersection.dataset.y);
-            console.log('Found intersection', x, y, 'hasStone:', !!intersection.querySelector('.stone'));
             this.handleClick(x, y);
-          } else {
-            console.log('No intersection found, target:', e.target.className, e.target.tagName);
           }
         });
 
-        document.getElementById('goban').addEventListener('mouseover', (e) => {
+        goban.addEventListener('mouseover', (e) => {
           const intersection = e.target.closest('.intersection');
           if (intersection) {
             const x = parseInt(intersection.dataset.x);
@@ -761,7 +760,7 @@
           }
         });
 
-        document.getElementById('goban').addEventListener('mouseout', (e) => {
+        goban.addEventListener('mouseout', (e) => {
           const intersection = e.target.closest('.intersection');
           if (intersection) {
             const x = parseInt(intersection.dataset.x);
