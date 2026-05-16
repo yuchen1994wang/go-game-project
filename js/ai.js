@@ -30,6 +30,10 @@ class AIAnalyzer {
 
 SGF棋谱：${sgf}
 
+【重要：坐标说明】
+- 请使用棋盘显示的坐标系统：横向使用大写字母A-J（不含I），纵向使用数字1-${game.size}（从下往上）
+- 例如：棋盘左下角是A1，右下角是J1，左上角是A${game.size}，右上角是J${game.size}
+
 请从以下几个方面进行分析（用中文回答，控制在300字以内）：
 1. 开局评价（布局是否合理）
 2. 中盘要点（关键战斗和转换）
@@ -95,6 +99,9 @@ SGF棋谱：${sgf}
       return { score: 0, analysis: 'Pass停一手，无法评价' };
     }
 
+    const letters = 'ABCDEFGHJKLMNOPQRST';
+    const currentPos = `${letters[currentMove.x]}${game.size - currentMove.y}`;
+    
     const prompt = `你是一位专业的围棋教练。请评价以下围棋对局中的特定一步棋，使用正负分数系统：
 
 棋局信息：
@@ -104,7 +111,11 @@ SGF棋谱：${sgf}
 
 需要评价的第${moveIndex + 1}手棋：
 - 棋手：${currentMove.playerName}
-- 落子位置：${String.fromCharCode(65 + currentMove.x)}${game.size - currentMove.y}
+- 落子位置：${currentPos}
+
+【重要：坐标说明】
+- 请使用棋盘显示的坐标系统：横向使用大写字母A-J（不含I），纵向使用数字1-${game.size}（从下往上）
+- 例如：棋盘左下角是A1，右下角是J1，左上角是A${game.size}，右上角是J${game.size}
 
 评分标准（-100到+100）：
 - +80到+100：妙手！神之一手，非常精彩
@@ -130,7 +141,7 @@ SGF棋谱：${sgf}
 
     try {
       console.log('AI评分开始，请求OpenRouter API...');
-      console.log('评价手数:', moveIndex + 1, '位置:', String.fromCharCode(65 + currentMove.x) + (game.size - currentMove.y));
+      console.log('评价手数:', moveIndex + 1, '位置:', currentPos);
 
       const apiKey = this.getApiKey();
       if (!apiKey) {
