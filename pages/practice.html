@@ -84,6 +84,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 16px;
     }
 
     .problem-card:hover {
@@ -94,6 +95,7 @@
 
     .problem-info {
       flex: 1;
+      min-width: 0;
     }
 
     .problem-title {
@@ -101,17 +103,24 @@
       font-size: 1rem;
       color: var(--text-primary);
       margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .problem-desc {
       font-size: 0.85rem;
       color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .problem-meta {
       display: flex;
       align-items: center;
       gap: 16px;
+      flex-shrink: 0;
     }
 
     .difficulty-badge {

@@ -586,17 +586,13 @@
           stone.classList.add('wrong-move');
           sound.playWrong();
           
-          if (this.isMultiStepProblem()) {
-            this.showStepProgress();
-          } else {
-            this.isFinished = true;
-            this.pauseTimer();
-            TsumegoStats.recordAttempt(this.problemId, false);
-            TsumegoStorage.addToWrongList(this.problemId);
-            this.updateWrongCount();
-            this.showResult(false, this.problem.wrongMoveHint);
-            showToast('回答错误，请继续尝试', 'warning');
-          }
+          this.isFinished = true;
+          this.pauseTimer();
+          TsumegoStats.recordAttempt(this.problemId, false);
+          TsumegoStorage.addToWrongList(this.problemId);
+          this.updateWrongCount();
+          this.showResult(false, this.problem.wrongMoveHint);
+          showToast('回答错误，请重置后再试', 'warning');
         }
         this.updateUI();
       }

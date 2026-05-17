@@ -287,6 +287,18 @@ h1 {
   color: white;
 }
 
+/* 头部导航 - 常驻 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-primary);
+  padding: 12px 0;
+}
 
 /* 模态框 */
 .modal-overlay {
