@@ -173,7 +173,6 @@
   <div class="container">
     <div class="header">
       <a href="home.html" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">← 返回首页</a>
-      <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
     </div>
 
     <div class="kifu-header">
@@ -203,9 +202,6 @@
 
       init() {
         ThemeManager.init();
-        document.getElementById('themeToggle').addEventListener('click', () => {
-          ThemeManager.toggle();
-        });
 
         this.render();
       }

@@ -28,7 +28,6 @@
   <div class="container">
     <div class="header">
       <a href="practice.html" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">← 返回</a>
-      <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
     </div>
 
     <div class="setup-container">
@@ -91,7 +90,6 @@
 
       init() {
         ThemeManager.init();
-        document.getElementById('themeToggle').addEventListener('click', () => ThemeManager.toggle());
         this.bindEvents();
       }
 

@@ -456,7 +456,6 @@
         </div>
       </div>
       <div class="header-right">
-        <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
         <button class="btn btn-secondary" id="settingsBtn" title="设置" style="padding: 8px 14px; font-size: 0.85rem;">⚙️ 设置</button>
         <div class="game-info">
           <div class="player-names">
@@ -642,9 +641,6 @@
         // 初始化主题和音效
         ThemeManager.init();
         SoundManager.init();
-        document.getElementById('themeToggle').addEventListener('click', () => {
-          ThemeManager.toggle();
-        });
 
         const settings = JSON.parse(sessionStorage.getItem('go_game_settings') || '{}');
         if (!settings.size) {

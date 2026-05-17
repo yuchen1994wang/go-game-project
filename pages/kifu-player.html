@@ -465,7 +465,6 @@
         </div>
       </div>
       <div class="header-right">
-        <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
       </div>
     </header>
 
@@ -551,9 +550,6 @@
 
       init() {
         ThemeManager.init();
-        document.getElementById('themeToggle').addEventListener('click', () => {
-          ThemeManager.toggle();
-        });
 
         // 加载棋谱
         const urlParams = new URLSearchParams(window.location.search);

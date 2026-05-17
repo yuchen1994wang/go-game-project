@@ -317,7 +317,6 @@
         </a>
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
-        <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
         <button class="btn btn-secondary" id="settingsBtn" title="设置" style="padding: 8px 14px; font-size: 0.85rem;">⚙️ 设置</button>
         <div class="user-info" id="userInfo">
           <div class="user-avatar" id="userAvatar">用</div>
@@ -440,9 +439,6 @@
 
       init() {
         ThemeManager.init();
-        document.getElementById('themeToggle').addEventListener('click', () => {
-          ThemeManager.toggle();
-        });
         this.loadUserInfo();
         this.loadHistory();
         this.initSettings();

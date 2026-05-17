@@ -91,7 +91,6 @@
   <div class="container">
     <div class="header">
       <a href="practice.html" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">← 返回列表</a>
-      <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
     </div>
 
     <div class="tsumego-container">
@@ -243,7 +242,6 @@
 
       init() {
         ThemeManager.init();
-        document.getElementById('themeToggle').addEventListener('click', () => ThemeManager.toggle());
 
         const params = new URLSearchParams(window.location.search);
         this.problemId = parseInt(params.get('id')) || 1;

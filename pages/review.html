@@ -434,7 +434,6 @@
           </div>
         </div>
       </div>
-      <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
       <a href="home.html" class="btn btn-secondary">返回首页</a>
     </header>
 
@@ -525,9 +524,6 @@
 
       init() {
         ThemeManager.init();
-        document.getElementById('themeToggle').addEventListener('click', () => {
-          ThemeManager.toggle();
-        });
 
         const params = new URLSearchParams(window.location.search);
         this.gameId = parseInt(params.get('id'));

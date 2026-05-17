@@ -67,7 +67,6 @@
   <div class="container">
     <div class="header">
       <button class="btn btn-secondary" id="backBtn" style="padding: 8px 16px; font-size: 0.85rem;">← 返回</button>
-      <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
     </div>
 
     <div class="match-container">
@@ -152,7 +151,6 @@
 
       init() {
         ThemeManager.init();
-        document.getElementById('themeToggle').addEventListener('click', () => ThemeManager.toggle());
 
         const params = new URLSearchParams(window.location.search);
         this.size = parseInt(params.get('size')) || 9;
