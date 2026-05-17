@@ -193,6 +193,8 @@
   </div>
 
   <script src="../js/utils.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/header.js"></script>
   <script src="../js/kifu-data.js"></script>
   <script>
     class KifuListApp {
@@ -201,7 +203,11 @@
       }
 
       init() {
-        ThemeManager.init();
+        Header.mount(document.querySelector('.header'), {
+          backUrl: 'home.html',
+          backText: '← 返回首页',
+          showSettingsModal: true
+        });
 
         this.render();
       }
