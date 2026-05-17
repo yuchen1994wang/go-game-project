@@ -1,6 +1,6 @@
 ---
 name: web-project-workflow
-version: 1.2.0
+version: 1.3.0
 description: Web 项目全流程开发助手。从需求确认，开发、本地测试到 GitHub Pages 部署的一站式工具。当用户需要开发和部署 Web 项目时使用。
 ---
 
@@ -205,6 +205,43 @@ grep -r -E "(sk_|password|token|secret|private_key)" --include="*.js" --include=
 - 表单提交正常
 - 数据存储/读取正常
 - **外部资源后备方案生效**
+
+#### 🔗 JS 依赖链检查（关键！）
+
+**核心原则：** 当页面引入共享 JS 模块时，必须完整引入其整个依赖链，且顺序正确。
+
+**常见错误：**
+- 引入 `header.js` 但忘记引入其依赖的 `storage.js`、`ai.js`
+- 脚本加载顺序错误：被依赖的文件必须在依赖者之前加载
+- 新增共享组件后，未同步更新所有引用页面
+
+**检查方法：**
+```bash
+# 1. 检查每个 HTML 文件的脚本加载顺序
+grep -n "<script src" pages/*.html
+
+# 2. 确认共享模块的依赖关系
+grep -r "class.*Manager\|const.*Manager" js/
+grep -r "new \|\.getApiKey\|\.getUsername" js/header.js
+```
+
+**依赖梳理流程：**
+1. 识别共享模块（如 header.js）依赖哪些其他模块
+2. 检查每个引用页面是否完整引入了所有依赖
+3. 验证加载顺序：被依赖文件 → 依赖文件
+4. 修改后全局搜索所有引用位置，确保一致性
+
+**示例（正确顺序）：**
+```html
+<!-- 基础工具类（无依赖） -->
+<script src="../js/utils.js"></script>
+<!-- 依赖 utils.js -->
+<script src="../js/storage.js"></script>
+<!-- 依赖 utils.js -->
+<script src="../js/ai.js"></script>
+<!-- 依赖 utils.js + storage.js + ai.js -->
+<script src="../js/header.js"></script>
+```
 
 ---
 
@@ -428,6 +465,22 @@ A: 在项目根目录添加 `CNAME` 文件，内容为你的域名，然后在 D
 
 ### Q: 部署后更新不生效？
 A: 清除浏览器缓存或等待 5-10 分钟让 CDN 更新。
+
+### Q: 页面报错 "XXX is not defined"？
+A: 这是 JS 依赖链断裂的典型错误：
+1. 检查报错变量属于哪个文件（如 `Storage` → `storage.js`）
+2. 确认引用页面是否引入了该文件
+3. 检查加载顺序：被依赖文件必须在依赖者之前
+4. 如果使用了共享组件（如 `header.js`），确保其完整依赖链都已引入
+
+**排查命令：**
+```bash
+# 查看所有页面的脚本引入情况
+grep -n "<script src" pages/*.html
+
+# 查找变量定义位置
+grep -r "class Storage\|const Storage" js/
+```
 
 ### Q: 推送前忘了测试，上线后发现问题怎么办？
 A: 立即回滚，然后在本地修复问题并充分测试后再推送。
