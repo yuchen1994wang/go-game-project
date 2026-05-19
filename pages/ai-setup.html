@@ -4,87 +4,231 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI 对弈设置 - 围棋对弈复盘</title>
-  <meta name="description" content="设置AI对弈参数，选择棋盘大小和AI难度">
+  <meta name="description" content="设置AI对弈参数，选择难度和棋盘大小">
   <meta name="keywords" content="围棋,围棋对弈,围棋学习,死活题,棋谱,AI对弈">
   <meta name="author" content="围棋对弈复盘">
   <meta name="robots" content="index, follow">
   <meta property="og:title" content="AI 对弈设置 - 围棋对弈复盘">
-  <meta property="og:description" content="设置AI对弈参数，选择棋盘大小和AI难度">
+  <meta property="og:description" content="设置AI对弈参数，选择难度和棋盘大小">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="theme-color" content="#C4A35A">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/common.css">
   <style>
-    .setup-container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .setup-title { font-family: 'Noto Serif SC', serif; font-size: 1.5rem; font-weight: 600; text-align: center; margin-bottom: 30px; color: var(--text-primary); }
-    .setup-section { background: var(--card-bg); border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid var(--border-color); }
-    .section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); }
-    .option-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .option-card { padding: 16px; border: 2px solid var(--border-color); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s; background: var(--bg-secondary); }
-    .option-card:hover { border-color: var(--accent-gold); transform: translateY(-2px); }
-    .option-card.selected { border-color: var(--accent-gold); background: var(--accent-gold-light); }
-    .option-icon { font-size: 2rem; margin-bottom: 8px; }
-    .option-label { font-weight: 600; color: var(--text-primary); }
-    .option-desc { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
-    .start-btn { width: 100%; padding: 16px; font-size: 1.1rem; background: var(--accent-gold); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
-    .start-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
-    .start-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    @media (max-width: 480px) { .option-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 480px) { .option-card { padding: 12px 8px; } }
-    @media (max-width: 480px) { .option-icon { font-size: 1.5rem; } }
-    @media (max-width: 480px) { .option-label { font-size: 0.9rem; } }
-    @media (max-width: 480px) { .option-desc { display: none; } }
+    .setup-page { display: flex; flex-direction: column; min-height: 100vh; }
+    header {
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    main { flex: 1; padding: 32px 24px; max-width: 600px; margin: 0 auto; width: 100%; }
+    .setup-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .setup-subtitle {
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .setup-section {
+      background: var(--panel-bg);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+    }
+    .section-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .option-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .option-btn {
+      padding: 10px 20px;
+      border: 2px solid var(--border-color);
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+      min-width: 80px;
+      text-align: center;
+    }
+    .option-btn:hover {
+      border-color: var(--accent-gold);
+    }
+    .option-btn.active {
+      background: var(--accent-gold);
+      border-color: var(--accent-gold);
+      color: white;
+    }
+    .ai-level-card {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+    .ai-level-card:hover {
+      border-color: var(--accent-gold);
+    }
+    .ai-level-card.active {
+      border-color: var(--accent-gold);
+      background: rgba(196, 163, 90, 0.1);
+    }
+    .ai-level-name {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+    .ai-level-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .color-selector {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+    .color-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 20px 32px;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--bg-secondary);
+    }
+    .color-option:hover {
+      border-color: var(--accent-gold);
+    }
+    .color-option.active {
+      border-color: var(--accent-gold);
+      background: rgba(196, 163, 90, 0.1);
+    }
+    .color-stone {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .color-stone.black {
+      background: radial-gradient(circle at 30% 30%, var(--stone-black-highlight), var(--stone-black) 60%);
+      box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.4);
+    }
+    .color-stone.white {
+      background: radial-gradient(circle at 30% 30%, #ffffff, var(--stone-white) 50%, var(--stone-white-shadow) 100%);
+      box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+    .color-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .start-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="setup-page">
     <div id="header-container"></div>
 
-    <div class="setup-container">
-      <h1 class="setup-title">🤖 AI 对弈设置</h1>
+    <main>
+      <h1 class="setup-title">AI 对弈设置</h1>
+      <p class="setup-subtitle">选择适合您的对弈参数</p>
 
       <div class="setup-section">
-        <div class="section-title">📐 棋盘大小</div>
-        <div class="board-size-options" id="sizeOptions">
-          <button type="button" class="board-size-option" data-size="9">
-            <span class="size-number">9</span>
-            <span class="size-label">路棋盘</span>
-          </button>
-          <button type="button" class="board-size-option" data-size="13">
-            <span class="size-number">13</span>
-            <span class="size-label">路棋盘</span>
-          </button>
-          <button type="button" class="board-size-option active" data-size="19">
-            <span class="size-number">19</span>
-            <span class="size-label">路棋盘</span>
-          </button>
+        <h2 class="section-title">🎯 棋盘大小</h2>
+        <div class="option-group">
+          <button class="option-btn active" data-size="19">19×19</button>
+          <button class="option-btn" data-size="13">13×13</button>
+          <button class="option-btn" data-size="9">9×9</button>
         </div>
       </div>
 
       <div class="setup-section">
-        <div class="section-title">🎯 AI 难度</div>
-        <div class="option-grid" id="levelOptions">
-          <div class="option-card selected" data-level="easy">
-            <div class="option-icon">🌱</div>
-            <div class="option-label">简单</div>
-            <div class="option-desc">适合新手</div>
+        <h2 class="section-title">🤖 AI 难度</h2>
+        <div class="ai-level-card active" data-level="easy">
+          <div class="ai-level-name">初级 AI</div>
+          <div class="ai-level-desc">适合初学者，会犯一些简单的错误</div>
+        </div>
+        <div class="ai-level-card" data-level="medium">
+          <div class="ai-level-name">中级 AI</div>
+          <div class="ai-level-desc">有一定水平，适合练习</div>
+        </div>
+        <div class="ai-level-card" data-level="hard">
+          <div class="ai-level-name">高级 AI</div>
+          <div class="ai-level-desc">较强的对手，需要认真应对</div>
+        </div>
+        <div class="ai-level-card" data-level="pro">
+          <div class="ai-level-name">职业 AI</div>
+          <div class="ai-level-desc">职业水平，极具挑战性</div>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <h2 class="section-title">⚫⚪ 选择执子</h2>
+        <div class="color-selector">
+          <div class="color-option active" data-color="black">
+            <div class="color-stone black"></div>
+            <span class="color-label">执黑</span>
           </div>
-          <div class="option-card" data-level="medium">
-            <div class="option-icon">🌿</div>
-            <div class="option-label">中等</div>
-            <div class="option-desc">有一定挑战</div>
-          </div>
-          <div class="option-card" data-level="hard">
-            <div class="option-icon">🌳</div>
-            <div class="option-label">困难</div>
-            <div class="option-desc">高手对决</div>
+          <div class="color-option" data-color="white">
+            <div class="color-stone white"></div>
+            <span class="color-label">执白</span>
           </div>
         </div>
       </div>
 
-      <button class="start-btn" id="startBtn">开始对弈</button>
-    </div>
+      <div class="setup-section">
+        <h2 class="section-title">📐 让子</h2>
+        <div class="option-group">
+          <button class="option-btn active" data-handicap="0">无让子</button>
+          <button class="option-btn" data-handicap="2">2子</button>
+          <button class="option-btn" data-handicap="3">3子</button>
+          <button class="option-btn" data-handicap="4">4子</button>
+          <button class="option-btn" data-handicap="5">5子</button>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <h2 class="section-title">📊 贴目</h2>
+        <div class="option-group">
+          <button class="option-btn active" data-komi="6.5">6.5目</button>
+          <button class="option-btn" data-komi="7.5">7.5目</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary start-btn" id="startBtn">开始对弈</button>
+    </main>
   </div>
 
   <script src="../js/utils.js"></script>
@@ -95,47 +239,92 @@
   <script src="../js/ai.js"></script>
   <script src="../js/header.js"></script>
   <script>
-    class AISetup {
+    class AISetupApp {
       constructor() {
-        this.selectedSize = 19;
-        this.selectedLevel = 'easy';
+        this.settings = {
+          size: 19,
+          level: 'easy',
+          humanColor: 'black',
+          handicap: 0,
+          komi: 6.5
+        };
         this.init();
       }
 
       init() {
         Header.mount(document.getElementById('header-container'), {
           backUrl: 'home.html',
+          backText: '← 返回首页',
           showSettings: true,
           showUser: true
         });
+
         this.bindEvents();
       }
 
       bindEvents() {
-        document.querySelectorAll('#sizeOptions .board-size-option').forEach(btn => {
+        // 棋盘大小选择
+        document.querySelectorAll('[data-size]').forEach(btn => {
           btn.addEventListener('click', () => {
-            document.querySelectorAll('#sizeOptions .board-size-option').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            this.selectedSize = parseInt(btn.dataset.size);
+            this.settings.size = parseInt(btn.dataset.size);
           });
         });
 
-        document.querySelectorAll('#levelOptions .option-card').forEach(card => {
+        // AI 难度选择
+        document.querySelectorAll('[data-level]').forEach(card => {
           card.addEventListener('click', () => {
-            document.querySelectorAll('#levelOptions .option-card').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            this.selectedLevel = card.dataset.level;
+            document.querySelectorAll('[data-level]').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            this.settings.level = card.dataset.level;
           });
         });
 
+        // 执子选择
+        document.querySelectorAll('[data-color]').forEach(option => {
+          option.addEventListener('click', () => {
+            document.querySelectorAll('[data-color]').forEach(o => o.classList.remove('active'));
+            option.classList.add('active');
+            this.settings.humanColor = option.dataset.color;
+          });
+        });
+
+        // 让子选择
+        document.querySelectorAll('[data-handicap]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-handicap]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.settings.handicap = parseInt(btn.dataset.handicap);
+          });
+        });
+
+        // 贴目选择
+        document.querySelectorAll('[data-komi]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-komi]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.settings.komi = parseFloat(btn.dataset.komi);
+          });
+        });
+
+        // 开始对弈
         document.getElementById('startBtn').addEventListener('click', () => {
-          window.location.href = `ai-match.html?size=${this.selectedSize}&level=${this.selectedLevel}`;
+          const params = new URLSearchParams({
+            size: this.settings.size,
+            level: this.settings.level,
+            humanColor: this.settings.humanColor,
+            handicap: this.settings.handicap,
+            komi: this.settings.komi,
+            human: Storage.getUsername() || '棋手'
+          });
+          window.location.href = `ai-match.html?${params.toString()}`;
         });
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      new AISetup();
+      new AISetupApp();
     });
   </script>
 </body>

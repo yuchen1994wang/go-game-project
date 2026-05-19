@@ -3,23 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>对弈 - 围棋对练复盘</title>
-  <meta name="description" content="在线围棋对弈，支持悔棋、停一手、封盘、AI分析等功能">
+  <title>对弈 - 围棋对弈复盘</title>
+  <meta name="description" content="围棋在线对弈，支持19路、13路、9路棋盘">
   <meta name="keywords" content="围棋,围棋对弈,围棋学习,死活题,棋谱,AI对弈">
   <meta name="author" content="围棋对弈复盘">
   <meta name="robots" content="index, follow">
-  <meta property="og:title" content="对弈 - 围棋对练复盘">
-  <meta property="og:description" content="在线围棋对弈，支持悔棋、停一手、封盘、AI分析等功能">
+  <meta property="og:title" content="对弈 - 围棋对弈复盘">
+  <meta property="og:description" content="围棋在线对弈，支持19路、13路、9路棋盘">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="theme-color" content="#C4A35A">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/common.css">
   <style>
     .game-page { display: flex; flex-direction: column; min-height: 100vh; }
-
     header {
       background: var(--panel-bg);
       backdrop-filter: blur(10px);
@@ -31,365 +28,115 @@
       flex-wrap: wrap;
       gap: 12px;
     }
-
     .header-left { display: flex; align-items: center; gap: 16px; }
-
-    .game-meta {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 0.9rem;
-    }
-
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--bg-secondary);
-      border-radius: 16px;
-    }
-
-    .meta-label { color: var(--text-secondary); font-size: 0.8rem; }
-    .meta-value { font-weight: 500; }
-
-    main {
-      flex: 1;
-      display: flex;
-      padding: 20px;
-      gap: 20px;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .board-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .board-wrapper {
-      position: relative;
-      background: linear-gradient(145deg, var(--board-wood-light) 0%, var(--board-wood) 50%, var(--board-dark) 100%);
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: var(--shadow-medium);
-    }
-
-    .goban {
-      position: relative;
-      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-      border-radius: 4px;
-    }
-
-    .board-grid {
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-    }
-
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .game-info { display: flex; align-items: center; gap: 16px; font-size: 0.9rem; color: var(--text-secondary); }
+    .game-info-item { display: flex; align-items: center; gap: 6px; }
+    .player-info { display: flex; align-items: center; gap: 8px; }
+    .player-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .player-dot.black { background: radial-gradient(circle at 30% 30%, var(--stone-black-highlight), var(--stone-black) 60%); }
+    .player-dot.white { background: radial-gradient(circle at 30% 30%, #ffffff, var(--stone-white) 50%, var(--stone-white-shadow) 100%); border: 1px solid rgba(0,0,0,0.1); }
+    .current-turn { padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    .current-turn.black { background: var(--stone-black); color: white; }
+    .current-turn.white { background: var(--stone-white); color: var(--text-primary); border: 1px solid var(--border-color); }
+    main { flex: 1; display: flex; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; width: 100%; }
+    .board-section { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .board-wrapper { position: relative; background: linear-gradient(145deg, var(--board-wood-light) 0%, var(--board-wood) 50%, var(--board-dark) 100%); border-radius: 8px; padding: 30px; box-shadow: var(--shadow-medium); }
+    .goban { position: relative; background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%); border-radius: 4px; overflow: visible; }
+    .board-grid { position: absolute; top: 0; left: 0; pointer-events: none; }
     .grid-line { stroke: var(--line-color); stroke-width: 1; opacity: 0.7; }
     .star-point { fill: var(--line-color); }
-
-    .intersection {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      transform: translate(-50%, -50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    .intersection:hover::before {
-      content: '';
-      position: absolute;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(102, 126, 234, 0.2);
-      pointer-events: none;
-    }
-
-    .stone {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      position: absolute;
-      z-index: 20;
-    }
-
-    .stone.black {
-      background: radial-gradient(circle at 30% 30%, var(--stone-black-highlight), var(--stone-black) 60%);
-      box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.4);
-    }
-
-    .stone.white {
-      background: radial-gradient(circle at 30% 30%, #ffffff, var(--stone-white) 50%, var(--stone-white-shadow) 100%);
-      box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1);
-    }
-
-    .stone.last-move::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-red);
-    }
-
-    .stone-number {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 0.7rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 600;
-      z-index: 30;
-      pointer-events: none;
-    }
-
-    .stone-number.black-text { color: rgba(255,255,255,0.9); }
-    .stone-number.white-text { color: rgba(0,0,0,0.7); }
-
-    .control-panel {
-      width: 360px;
-      background: var(--panel-bg);
-      border-radius: 16px;
-      box-shadow: var(--shadow-medium);
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      max-height: calc(100vh - 140px);
-    }
-
-    .panel-section {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
+    .board-coords { position: absolute; display: flex; justify-content: space-between; pointer-events: none; }
+    .coord-label { font-size: 10px; color: var(--line-color); font-family: 'JetBrains Mono', monospace; text-align: center; }
+    .coord-top { top: -20px; left: 30px; right: 30px; }
+    .coord-bottom { bottom: -20px; left: 30px; right: 30px; }
+    .coord-left { left: -20px; top: 30px; bottom: 30px; flex-direction: column; }
+    .coord-right { right: -20px; top: 30px; bottom: 30px; flex-direction: column; }
+    .intersection { position: absolute; width: 40px; height: 40px; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; z-index: 10; }
+    .intersection:hover::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 36px; height: 36px; border-radius: 50%; background: rgba(102, 126, 234, 0.3); pointer-events: none; }
+    .stone { width: 36px; height: 36px; border-radius: 50%; position: absolute; transform: scale(0); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 20; }
+    .stone.visible { transform: scale(1); }
+    .stone.black { background: radial-gradient(circle at 30% 30%, var(--stone-black-highlight), var(--stone-black) 60%); box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.4); }
+    .stone.white { background: radial-gradient(circle at 30% 30%, #ffffff, var(--stone-white) 50%, var(--stone-white-shadow) 100%); box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1); }
+    .stone.last-move::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; border-radius: 50%; background: var(--accent-red); box-shadow: 0 0 4px rgba(196, 30, 58, 0.6); }
+    .stone .move-number { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace; z-index: 25; pointer-events: none; }
+    .stone.black .move-number { color: rgba(255,255,255,0.9); }
+    .stone.white .move-number { color: rgba(0,0,0,0.8); }
+    .stone.preview { opacity: 0.5; transform: scale(1) !important; pointer-events: none; }
+    .control-panel { width: 380px; background: var(--panel-bg); border-radius: 16px; box-shadow: var(--shadow-medium); border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; max-height: calc(100vh - 140px); }
+    .panel-section { padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
     .panel-section:last-child { border-bottom: none; }
-
-    .panel-title {
-      font-family: 'Noto Serif SC', serif;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    .status-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 16px;
-      padding: 12px;
-      background: var(--bg-secondary);
-      border-radius: 10px;
-    }
-
-    .current-player {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-    }
-
-    .current-player.black {
-      background: radial-gradient(circle at 30% 30%, var(--stone-black-highlight), var(--stone-black));
-    }
-
-    .current-player.white {
-      background: radial-gradient(circle at 30% 30%, #ffffff, var(--stone-white));
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
-    }
-
-    .status-text { font-size: 0.95rem; color: var(--text-primary); }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .stat-box {
-      text-align: center;
-      padding: 12px;
-      background: var(--bg-secondary);
-      border-radius: 10px;
-    }
-
-    .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; }
-    .stat-value { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); }
-
-    .timer-display {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .timer-box {
-      flex: 1;
-      text-align: center;
-      padding: 12px;
-      background: var(--bg-secondary);
-      border-radius: 10px;
-    }
-
-    .timer-label {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-    }
-
-    .timer-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
-
-    .timer-value.warning { color: var(--accent-red); }
-
-    .move-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .move-item {
-      padding: 8px 12px;
-      background: var(--bg-secondary);
-      border-radius: 8px;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .move-item:hover { background: var(--board-wood-light); }
+    .panel-title { font-family: 'Noto Serif SC', serif; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+    .game-controls { display: flex; gap: 8px; margin-bottom: 12px; }
+    .control-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+    .control-btn:hover { background: var(--border-color); }
+    .control-btn.primary { background: var(--accent-gold); color: white; border-color: var(--accent-gold); }
+    .control-btn.primary:hover { background: #D4A017; }
+    .control-btn.danger { background: #FFEBEE; color: #C62828; border-color: #EF9A9A; }
+    .control-btn.danger:hover { background: #FFCDD2; }
+    .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .game-status { padding: 12px; background: var(--bg-secondary); border-radius: 10px; font-size: 0.9rem; }
+    .status-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .status-row:last-child { margin-bottom: 0; }
+    .status-label { color: var(--text-secondary); }
+    .status-value { font-weight: 600; }
+    .status-value.black { color: var(--stone-black); }
+    .status-value.white { color: var(--stone-white-shadow); }
+    .move-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+    .move-item { padding: 6px 10px; background: var(--bg-secondary); border-radius: 6px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
+    .move-item:hover { background: var(--border-color); }
     .move-item.active { background: var(--accent-gold); color: white; }
-    .move-item.active .move-num { color: rgba(255,255,255,0.8); }
-
-    .move-num {
-      color: var(--text-secondary);
-      font-weight: 500;
-      font-family: 'JetBrains Mono', monospace;
-      min-width: 24px;
-    }
-
-    .move-stone {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-
-    .move-stone.black { background: var(--stone-black); }
-    .move-stone.white { background: var(--stone-white); border: 1px solid var(--stone-white-shadow); }
-
-    .move-coord { color: var(--text-secondary); }
-
-    .btn-group {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .btn-group .btn {
-      flex: 1;
-      min-width: 80px;
-      padding: 10px 14px;
-      font-size: 0.85rem;
-    }
-
-    .result-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .result-modal.visible { display: flex; }
-
-    .result-content {
-      background: var(--card-bg);
-      padding: 30px;
-      border-radius: 16px;
-      text-align: center;
-      max-width: 400px;
-      width: 90%;
-    }
-
-    .result-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--text-primary);
-    }
-
-    .result-details {
-      font-size: 1rem;
-      color: var(--text-secondary);
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-
-    @media (max-width: 900px) {
-      main { flex-direction: column; }
-      .control-panel { width: 100%; max-height: none; }
-    }
+    .move-item-num { min-width: 28px; font-family: 'JetBrains Mono', monospace; }
+    .move-item-stone { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .move-item-stone.black { background: var(--stone-black); }
+    .move-item-stone.white { background: var(--stone-white); border: 1px solid var(--stone-white-shadow); }
+    .move-item-coord { flex: 1; }
+    .pass-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); font-family: inherit; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .pass-btn:hover { background: var(--border-color); color: var(--text-primary); }
+    .pass-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .resign-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid #EF9A9A; background: #FFEBEE; color: #C62828; font-family: inherit; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .resign-btn:hover { background: #FFCDD2; }
+    .resign-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .timer-display { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 600; }
+    .timer-display.warning { color: #C62828; }
+    .timer-display.paused { opacity: 0.5; }
+    .score-display { font-size: 1.1rem; font-weight: 600; }
+    @media (max-width: 900px) { main { flex-direction: column; } .control-panel { width: 100%; max-height: none; } }
   </style>
 </head>
 <body>
   <div class="game-page">
     <header>
       <div class="header-left">
-        <a href="home.html" class="logo">
-          <div class="logo-icon"></div>
-          <h1>围棋对练</h1>
-        </a>
-        <div class="game-meta">
-          <div class="meta-item">
-            <span class="player-indicator black"></span>
-            <span class="meta-value" id="blackPlayerName">黑方</span>
+        <a href="home.html" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">← 返回首页</a>
+        <div class="game-info">
+          <div class="game-info-item">
+            <div class="player-info">
+              <div class="player-dot black"></div>
+              <span id="blackPlayerName">黑方</span>
+              <span class="current-turn black" id="blackTurn" style="display: none;">当前</span>
+            </div>
           </div>
-          <div class="meta-item">
-            <span class="player-indicator white"></span>
-            <span class="meta-value" id="whitePlayerName">白方</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">棋盘</span>
-            <span class="meta-value" id="boardSize">13路</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">手数</span>
-            <span class="meta-value" id="moveCount">0手</span>
+          <div class="game-info-item">VS</div>
+          <div class="game-info-item">
+            <div class="player-info">
+              <div class="player-dot white"></div>
+              <span id="whitePlayerName">白方</span>
+              <span class="current-turn white" id="whiteTurn" style="display: none;">当前</span>
+            </div>
           </div>
         </div>
       </div>
-      <a href="home.html" class="btn btn-secondary">返回首页</a>
+      <div class="header-right">
+        <div class="game-info-item">
+          <span>⏱</span>
+          <span id="gameTimer">00:00</span>
+        </div>
+        <div class="game-info-item">
+          <span>🎯</span>
+          <span id="moveCount">0手</span>
+        </div>
+      </div>
     </header>
 
     <main>
@@ -401,62 +148,50 @@
 
       <aside class="control-panel">
         <div class="panel-section">
-          <h3 class="panel-title">对局状态</h3>
-          <div class="status-row">
-            <div class="current-player" id="currentPlayer"></div>
-            <span class="status-text" id="statusText">黑方落子</span>
-          </div>
-
-          <div class="timer-display">
-            <div class="timer-box">
-              <div class="timer-label">黑方用时</div>
-              <div class="timer-value" id="blackTimer">00:00</div>
+          <h3 class="panel-title">对局信息</h3>
+          <div class="game-status">
+            <div class="status-row">
+              <span class="status-label">棋盘大小</span>
+              <span class="status-value" id="boardSize">19×19</span>
             </div>
-            <div class="timer-box">
-              <div class="timer-label">白方用时</div>
-              <div class="timer-value" id="whiteTimer">00:00</div>
+            <div class="status-row">
+              <span class="status-label">当前回合</span>
+              <span class="status-value black" id="currentTurn">黑棋</span>
             </div>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-box">
-              <div class="stat-label">黑方提子</div>
-              <div class="stat-value" id="blackCaptures">0</div>
+            <div class="status-row">
+              <span class="status-label">黑方用时</span>
+              <span class="timer-display" id="blackTimer">00:00</span>
             </div>
-            <div class="stat-box">
-              <div class="stat-label">白方提子</div>
-              <div class="stat-value" id="whiteCaptures">0</div>
+            <div class="status-row">
+              <span class="status-label">白方用时</span>
+              <span class="timer-display" id="whiteTimer">00:00</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">提子数</span>
+              <span class="status-value" id="captures">黑: 0 | 白: 0</span>
             </div>
           </div>
-        </div>
-
-        <div class="panel-section">
-          <h3 class="panel-title">手数列表</h3>
-          <div class="move-list" id="moveList"></div>
         </div>
 
         <div class="panel-section">
           <h3 class="panel-title">操作</h3>
-          <div class="btn-group">
-            <button class="btn btn-secondary" id="undoBtn">悔棋</button>
-            <button class="btn btn-secondary" id="passBtn">停一手</button>
-            <button class="btn btn-secondary" id="pauseBtn">封盘</button>
-            <button class="btn btn-danger" id="resignBtn">认输</button>
+          <div class="game-controls">
+            <button class="control-btn" id="undoBtn" title="悔棋">↩ 悔棋</button>
+            <button class="control-btn" id="passBtn" title="停一手">⏸ 停一手</button>
+            <button class="control-btn danger" id="resignBtn" title="认输">🏳 认输</button>
           </div>
+          <div class="game-controls">
+            <button class="control-btn primary" id="saveBtn" title="保存">💾 保存</button>
+            <button class="control-btn" id="scoreBtn" title="数棋">📊 数棋</button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <h3 class="panel-title">手数记录</h3>
+          <div class="move-list" id="moveList"></div>
         </div>
       </aside>
     </main>
-  </div>
-
-  <div class="result-modal" id="resultModal">
-    <div class="result-content">
-      <div class="result-title" id="resultTitle">对局结束</div>
-      <div class="result-details" id="resultDetails"></div>
-      <div style="display: flex; gap: 12px; justify-content: center;">
-        <a href="home.html" class="btn btn-secondary">返回首页</a>
-        <a href="review.html" class="btn btn-primary" id="reviewBtn">查看复盘</a>
-      </div>
-    </div>
   </div>
 
   <script src="../js/utils.js"></script>
@@ -464,38 +199,120 @@
   <script src="../js/loading.js"></script>
   <script src="../js/storage.js"></script>
   <script src="../js/board-component.js"></script>
-  <script src="../js/game.js"></script>
   <script src="../js/ai.js"></script>
+  <script src="../js/header.js"></script>
   <script>
+    class SoundEffects {
+      constructor() { this.ctx = null; this.enabled = true; }
+      init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+      playStone() {
+        if (!this.enabled) return; this.init();
+        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.frequency.value = 800; osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.1);
+      }
+      playCapture() {
+        if (!this.enabled) return; this.init();
+        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.frequency.value = 1200; osc.type = 'sine';
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.15);
+      }
+      playPass() {
+        if (!this.enabled) return; this.init();
+        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.frequency.value = 400; osc.type = 'sine';
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.2);
+      }
+    }
+
+    const sound = new SoundEffects();
+
     class GameApp {
       constructor() {
         this.game = null;
+        this.gameId = null;
         this.cellSize = 40;
         this.boardPadding = 30;
+        this.letters = 'ABCDEFGHJKLMNOPQRST';
+        this.moveHistory = [];
+        this.currentMove = -1;
+        this.blackCaptures = 0;
+        this.whiteCaptures = 0;
+        this.blackTime = 0;
+        this.whiteTime = 0;
         this.timerInterval = null;
+        this.isPaused = false;
+        this.consecutivePasses = 0;
+        this.isGameOver = false;
+        this.blackPlayer = '黑方';
+        this.whitePlayer = '白方';
+        this.gameType = 'human';
+        this.komi = 6.5;
+
         this.init();
       }
 
       init() {
-        ThemeManager.init();
-
-        const params = new URLSearchParams(window.location.search);
-        const size = parseInt(params.get('size')) || 13;
-        const blackPlayer = params.get('black') || '黑方';
-        const whitePlayer = params.get('white') || '白方';
-
-        this.game = new GoGame(size);
-        this.game.setPlayerNames(blackPlayer, whitePlayer);
-
-        document.getElementById('blackPlayerName').textContent = blackPlayer;
-        document.getElementById('whitePlayerName').textContent = whitePlayer;
-        document.getElementById('boardSize').textContent = `${size}路`;
-
+        Header.init();
+        this.loadGameConfig();
+        this.initGame();
         this.renderBoard();
         this.renderCoords();
         this.updateUI();
-        this.startTimer();
         this.bindEvents();
+        this.startTimer();
+      }
+
+      loadGameConfig() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const size = parseInt(urlParams.get('size')) || 19;
+        const handicap = parseInt(urlParams.get('handicap')) || 0;
+        const komi = parseFloat(urlParams.get('komi')) || 6.5;
+        const blackPlayer = urlParams.get('black') || Storage.getUsername() || '黑方';
+        const whitePlayer = urlParams.get('white') || '白方';
+        const gameType = urlParams.get('type') || 'human';
+
+        this.gameConfig = { size, handicap, komi, blackPlayer, whitePlayer, gameType };
+        this.blackPlayer = blackPlayer;
+        this.whitePlayer = whitePlayer;
+        this.gameType = gameType;
+        this.komi = komi;
+
+        document.getElementById('blackPlayerName').textContent = blackPlayer;
+        document.getElementById('whitePlayerName').textContent = whitePlayer;
+        document.getElementById('boardSize').textContent = `${size}×${size}`;
+      }
+
+      initGame() {
+        const { size, handicap } = this.gameConfig;
+        this.game = new GoGame(size);
+        this.gameId = Date.now().toString();
+
+        if (handicap > 0) {
+          const handicapStones = this.getHandicapStones(size, handicap);
+          handicapStones.forEach(([x, y]) => {
+            this.game.board[y][x] = 1;
+          });
+          this.game.currentPlayer = 2;
+        }
+      }
+
+      getHandicapStones(size, count) {
+        const stones = {
+          9: { 2: [[2, 2], [6, 6]], 3: [[2, 2], [6, 6], [2, 6]], 4: [[2, 2], [6, 6], [2, 6], [6, 2]], 5: [[2, 2], [6, 6], [2, 6], [6, 2], [4, 4]] },
+          13: { 2: [[3, 3], [9, 9]], 3: [[3, 3], [9, 9], [3, 9]], 4: [[3, 3], [9, 9], [3, 9], [9, 3]], 5: [[3, 3], [9, 9], [3, 9], [9, 3], [6, 6]] },
+          19: { 2: [[3, 3], [15, 15]], 3: [[3, 3], [15, 15], [3, 15]], 4: [[3, 3], [15, 15], [3, 15], [15, 3]], 5: [[3, 3], [15, 15], [3, 15], [15, 3], [9, 9]], 6: [[3, 3], [15, 15], [3, 15], [15, 3], [3, 9], [15, 9]], 7: [[3, 3], [15, 15], [3, 15], [15, 3], [3, 9], [15, 9], [9, 9]], 8: [[3, 3], [15, 15], [3, 15], [15, 3], [3, 9], [15, 9], [9, 3], [9, 15]], 9: [[3, 3], [15, 15], [3, 15], [15, 3], [3, 9], [15, 9], [9, 3], [9, 15], [9, 9]] }
+        };
+        return (stones[size] && stones[size][count]) || [];
       }
 
       renderBoard() {
@@ -516,7 +333,6 @@
 
         for (let i = 0; i < size; i++) {
           const pos = this.boardPadding + i * this.cellSize;
-
           const hLine = document.createElementNS(svgNS, 'line');
           hLine.setAttribute('class', 'grid-line');
           hLine.setAttribute('x1', this.boardPadding);
@@ -557,19 +373,20 @@
             goban.appendChild(intersection);
           }
         }
+
+        this.updateBoard();
       }
 
       renderCoords() {
         const goban = document.getElementById('goban');
         const size = this.game.size;
-        const letters = 'ABCDEFGHJKLMNOPQRST'.split('');
 
         const topCoords = document.createElement('div');
         topCoords.className = 'board-coords coord-top';
         for (let i = 0; i < size; i++) {
           const label = document.createElement('span');
           label.className = 'coord-label';
-          label.textContent = letters[i] || '';
+          label.textContent = this.letters[i] || '';
           topCoords.appendChild(label);
         }
         goban.appendChild(topCoords);
@@ -579,7 +396,7 @@
         for (let i = 0; i < size; i++) {
           const label = document.createElement('span');
           label.className = 'coord-label';
-          label.textContent = letters[i] || '';
+          label.textContent = this.letters[i] || '';
           bottomCoords.appendChild(label);
         }
         goban.appendChild(bottomCoords);
@@ -625,259 +442,322 @@
         return points;
       }
 
-      handleClick(x, y) {
-        if (this.game.isGameOver || this.game.isPaused) return;
+      updateBoard() {
+        const size = this.game.size;
+        const intersections = document.querySelectorAll('.intersection');
 
-        const result = this.game.play(x, y);
-        if (result.success) {
-          this.placeStone(x, y, this.game.currentPlayer === 1 ? 'white' : 'black');
-          this.removeLastMoveMarker();
-          this.markLastMove(x, y);
-          this.updateUI();
-          this.updateMoveList();
-
-          if (result.captures > 0) {
-            this.removeCapturedStones(result.capturedStones);
-            showToast(`提子 ${result.captures} 颗`, 'success');
-          }
-
-          if (this.game.isGameOver) {
-            this.endGame();
-          }
-        } else {
-          showToast(result.message, 'warning');
-        }
-      }
-
-      placeStone(x, y, color) {
-        const intersection = document.querySelector(`.intersection[data-x="${x}"][data-y="${y}"]`);
-        if (!intersection) return;
-
-        const stone = document.createElement('div');
-        stone.className = `stone ${color}`;
-        intersection.appendChild(stone);
-      }
-
-      removeLastMoveMarker() {
-        const lastMove = document.querySelector('.stone.last-move');
-        if (lastMove) lastMove.classList.remove('last-move');
-      }
-
-      markLastMove(x, y) {
-        const intersection = document.querySelector(`.intersection[data-x="${x}"][data-y="${y}"]`);
-        if (intersection) {
+        intersections.forEach(intersection => {
+          const x = parseInt(intersection.dataset.x);
+          const y = parseInt(intersection.dataset.y);
           const stone = intersection.querySelector('.stone');
-          if (stone) stone.classList.add('last-move');
-        }
-      }
 
-      removeCapturedStones(stones) {
-        stones.forEach(({x, y}) => {
-          const intersection = document.querySelector(`.intersection[data-x="${x}"][data-y="${y}"]`);
-          if (intersection) {
-            const stone = intersection.querySelector('.stone');
-            if (stone) stone.remove();
+          if (stone) stone.remove();
+
+          const cellValue = this.game.board[y][x];
+          if (cellValue !== 0) {
+            const stoneColor = cellValue === 1 ? 'black' : 'white';
+            const isLastMove = this.moveHistory.length > 0 &&
+              this.moveHistory[this.moveHistory.length - 1].x === x &&
+              this.moveHistory[this.moveHistory.length - 1].y === y;
+
+            const newStone = document.createElement('div');
+            newStone.className = `stone ${stoneColor}${isLastMove ? ' last-move' : ''}`;
+            intersection.appendChild(newStone);
+            requestAnimationFrame(() => newStone.classList.add('visible'));
           }
         });
       }
 
-      updateUI() {
-        const playerIndicator = document.getElementById('currentPlayer');
-        const statusText = document.getElementById('statusText');
+      handleClick(x, y) {
+        if (this.isGameOver || this.isPaused) return;
 
-        if (this.game.isGameOver) {
-          playerIndicator.className = 'current-player';
-          statusText.textContent = '对局结束';
-        } else if (this.game.isPaused) {
-          playerIndicator.className = 'current-player';
-          statusText.textContent = '已封盘';
-        } else {
-          playerIndicator.className = `current-player ${this.game.currentPlayer === 1 ? 'black' : 'white'}`;
-          statusText.textContent = `${this.game.currentPlayer === 1 ? '黑方' : '白方'}落子`;
+        const result = this.game.makeMove(x, y);
+        if (!result.success) {
+          showToast(result.message, 'warning');
+          return;
         }
 
-        document.getElementById('moveCount').textContent = `${this.game.moveHistory.length}手`;
-        document.getElementById('blackCaptures').textContent = this.game.capturedBlack;
-        document.getElementById('whiteCaptures').textContent = this.game.capturedWhite;
+        sound.playStone();
+
+        if (result.captures && result.captures.length > 0) {
+          sound.playCapture();
+          if (this.game.currentPlayer === 2) {
+            this.blackCaptures += result.captures.length;
+          } else {
+            this.whiteCaptures += result.captures.length;
+          }
+        }
+
+        this.moveHistory.push({ x, y, player: this.game.currentPlayer === 2 ? 1 : 2, captures: result.captures || [] });
+        this.currentMove = this.moveHistory.length - 1;
+        this.consecutivePasses = 0;
+
+        this.updateBoard();
+        this.updateUI();
+        this.renderMoveList();
+      }
+
+      handlePass() {
+        if (this.isGameOver || this.isPaused) return;
+
+        sound.playPass();
+        this.moveHistory.push({ x: -1, y: -1, player: this.game.currentPlayer, isPass: true });
+        this.currentMove = this.moveHistory.length - 1;
+        this.consecutivePasses++;
+
+        if (this.consecutivePasses >= 2) {
+          this.endGame('双方连续停手，对局结束');
+          return;
+        }
+
+        this.game.currentPlayer = this.game.currentPlayer === 1 ? 2 : 1;
+        this.updateUI();
+        this.renderMoveList();
+        showToast(`${this.game.currentPlayer === 1 ? '黑棋' : '白棋'}停一手`, 'info');
+      }
+
+      handleUndo() {
+        if (this.isGameOver || this.moveHistory.length === 0) return;
+
+        const lastMove = this.moveHistory.pop();
+        this.currentMove = this.moveHistory.length - 1;
+
+        if (lastMove.isPass) {
+          this.game.currentPlayer = lastMove.player;
+          this.consecutivePasses--;
+        } else {
+          this.game.board[lastMove.y][lastMove.x] = 0;
+          if (lastMove.captures) {
+            lastMove.captures.forEach(([x, y]) => {
+              this.game.board[y][x] = lastMove.player === 1 ? 2 : 1;
+            });
+            if (lastMove.player === 1) {
+              this.whiteCaptures -= lastMove.captures.length;
+            } else {
+              this.blackCaptures -= lastMove.captures.length;
+            }
+          }
+          this.game.currentPlayer = lastMove.player;
+        }
+
+        this.updateBoard();
+        this.updateUI();
+        this.renderMoveList();
+        showToast('已悔棋', 'info');
+      }
+
+      handleResign() {
+        if (this.isGameOver) return;
+        if (!confirm('确定要认输吗？')) return;
+
+        const winner = this.game.currentPlayer === 1 ? '白棋' : '黑棋';
+        this.endGame(`${this.game.currentPlayer === 1 ? '黑棋' : '白棋'}认输，${winner}获胜`);
+      }
+
+      handleSave() {
+        const gameData = {
+          id: this.gameId,
+          type: this.gameType,
+          size: this.game.size,
+          blackPlayer: this.blackPlayer,
+          whitePlayer: this.whitePlayer,
+          moveHistory: this.moveHistory,
+          blackCaptures: this.blackCaptures,
+          whiteCaptures: this.whiteCaptures,
+          blackTime: this.blackTime,
+          whiteTime: this.whiteTime,
+          komi: this.komi,
+          savedAt: Date.now(),
+          isGameOver: this.isGameOver,
+          result: this.gameResult || null
+        };
+
+        Storage.saveGame(gameData);
+        showToast('对局已保存', 'success');
+      }
+
+      handleScore() {
+        if (this.moveHistory.length === 0) {
+          showToast('还没有落子，无法数棋', 'warning');
+          return;
+        }
+
+        const score = this.game.calculateScore(this.komi);
+        let resultText = '';
+        if (score.winner === 'black') {
+          resultText = `黑棋胜 ${score.margin.toFixed(1)} 目`;
+        } else if (score.winner === 'white') {
+          resultText = `白棋胜 ${score.margin.toFixed(1)} 目`;
+        } else {
+          resultText = '和棋';
+        }
+
+        showToast(`数棋结果：${resultText}`, 'info');
+      }
+
+      endGame(reason) {
+        this.isGameOver = true;
+        this.pauseTimer();
+
+        const score = this.game.calculateScore(this.komi);
+        let resultText = '';
+        if (score.winner === 'black') {
+          resultText = `黑棋胜 ${score.margin.toFixed(1)} 目`;
+        } else if (score.winner === 'white') {
+          resultText = `白棋胜 ${score.margin.toFixed(1)} 目`;
+        } else {
+          resultText = '和棋';
+        }
+
+        this.gameResult = {
+          reason: reason,
+          winner: score.winner,
+          margin: score.margin,
+          blackScore: score.black,
+          whiteScore: score.white
+        };
+
+        showToast(`${reason}\n${resultText}`, 'success');
+        this.updateUI();
+
+        // 自动保存
+        this.handleSave();
+      }
+
+      startTimer() {
+        this.timerInterval = setInterval(() => {
+          if (this.isPaused || this.isGameOver) return;
+
+          if (this.game.currentPlayer === 1) {
+            this.blackTime++;
+          } else {
+            this.whiteTime++;
+          }
+
+          this.updateTimerDisplay();
+        }, 1000);
+      }
+
+      pauseTimer() {
+        this.isPaused = true;
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+          this.timerInterval = null;
+        }
+      }
+
+      updateTimerDisplay() {
+        const blackMins = Math.floor(this.blackTime / 60);
+        const blackSecs = this.blackTime % 60;
+        document.getElementById('blackTimer').textContent =
+          `${String(blackMins).padStart(2, '0')}:${String(blackSecs).padStart(2, '0')}`;
+
+        const whiteMins = Math.floor(this.whiteTime / 60);
+        const whiteSecs = this.whiteTime % 60;
+        document.getElementById('whiteTimer').textContent =
+          `${String(whiteMins).padStart(2, '0')}:${String(whiteSecs).padStart(2, '0')}`;
+
+        const totalTime = this.blackTime + this.whiteTime;
+        const totalMins = Math.floor(totalTime / 60);
+        const totalSecs = totalTime % 60;
+        document.getElementById('gameTimer').textContent =
+          `${String(totalMins).padStart(2, '0')}:${String(totalSecs).padStart(2, '0')}`;
+      }
+
+      updateUI() {
+        const currentPlayer = this.game.currentPlayer;
+        document.getElementById('currentTurn').textContent = currentPlayer === 1 ? '黑棋' : '白棋';
+        document.getElementById('currentTurn').className = `status-value ${currentPlayer === 1 ? 'black' : 'white'}`;
+
+        document.getElementById('blackTurn').style.display = currentPlayer === 1 ? 'inline' : 'none';
+        document.getElementById('whiteTurn').style.display = currentPlayer === 2 ? 'inline' : 'none';
+
+        document.getElementById('captures').textContent = `黑: ${this.blackCaptures} | 白: ${this.whiteCaptures}`;
+        document.getElementById('moveCount').textContent = `${this.moveHistory.length}手`;
+
+        document.getElementById('undoBtn').disabled = this.moveHistory.length === 0 || this.isGameOver;
+        document.getElementById('passBtn').disabled = this.isGameOver;
+        document.getElementById('resignBtn').disabled = this.isGameOver;
+        document.getElementById('scoreBtn').disabled = this.moveHistory.length === 0;
 
         this.updateTimerDisplay();
       }
 
-      updateMoveList() {
-        const moveList = document.getElementById('moveList');
-        const move = this.game.moveHistory[this.game.moveHistory.length - 1];
-        if (!move) return;
+      renderMoveList() {
+        const list = document.getElementById('moveList');
+        list.innerHTML = '';
 
-        const item = document.createElement('div');
-        item.className = 'move-item active';
-        item.dataset.index = this.game.moveHistory.length - 1;
+        this.moveHistory.forEach((move, index) => {
+          const item = document.createElement('div');
+          item.className = 'move-item';
+          item.dataset.index = index;
 
-        const num = document.createElement('span');
-        num.className = 'move-num';
-        num.textContent = this.game.moveHistory.length;
+          const num = document.createElement('span');
+          num.className = 'move-item-num';
+          num.textContent = index + 1;
 
-        const stone = document.createElement('span');
-        stone.className = `move-stone ${move.player === 1 ? 'black' : 'white'}`;
+          const stone = document.createElement('span');
+          stone.className = `move-item-stone ${move.player === 1 ? 'black' : 'white'}`;
 
-        const coord = document.createElement('span');
-        coord.className = 'move-coord';
-        coord.textContent = move.pass ? 'Pass' : `${String.fromCharCode(65 + move.x)}${this.game.size - move.y}`;
-
-        item.appendChild(num);
-        item.appendChild(stone);
-        item.appendChild(coord);
-
-        item.addEventListener('click', () => this.jumpToMove(parseInt(item.dataset.index)));
-
-        moveList.querySelectorAll('.move-item').forEach(i => i.classList.remove('active'));
-        moveList.appendChild(item);
-        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      jumpToMove(index) {
-        // 复盘模式：显示到指定手数
-        const moves = this.game.moveHistory.slice(0, index + 1);
-        this.renderBoard();
-        this.renderCoords();
-
-        moves.forEach((move, i) => {
-          if (!move.pass) {
-            this.placeStone(move.x, move.y, move.player === 1 ? 'black' : 'white');
-            if (i === moves.length - 1) {
-              this.markLastMove(move.x, move.y);
-            }
+          const coord = document.createElement('span');
+          coord.className = 'move-item-coord';
+          if (move.isPass) {
+            coord.textContent = '停一手';
+          } else {
+            coord.textContent = `${this.letters[move.x]}${this.game.size - move.y}`;
           }
+
+          item.appendChild(num);
+          item.appendChild(stone);
+          item.appendChild(coord);
+
+          item.addEventListener('click', () => {
+            this.goToMove(index);
+          });
+
+          list.appendChild(item);
         });
 
+        // 滚动到底部
+        list.scrollTop = list.scrollHeight;
+      }
+
+      goToMove(index) {
+        if (index < 0 || index >= this.moveHistory.length) return;
+
+        // 重置棋盘到指定步数
+        this.game = new GoGame(this.game.size);
+        this.blackCaptures = 0;
+        this.whiteCaptures = 0;
+
+        for (let i = 0; i <= index; i++) {
+          const move = this.moveHistory[i];
+          if (!move.isPass) {
+            const result = this.game.makeMove(move.x, move.y);
+            if (result.captures) {
+              if (move.player === 1) {
+                this.blackCaptures += result.captures.length;
+              } else {
+                this.whiteCaptures += result.captures.length;
+              }
+            }
+          }
+        }
+
+        this.currentMove = index;
+        this.updateBoard();
+        this.updateUI();
+
+        // 高亮当前手
         document.querySelectorAll('.move-item').forEach((item, i) => {
           item.classList.toggle('active', i === index);
         });
       }
 
-      startTimer() {
-        this.timerInterval = setInterval(() => {
-          if (!this.game.isGameOver && !this.game.isPaused) {
-            if (this.game.currentPlayer === 1) {
-              this.game.blackTime++;
-            } else {
-              this.game.whiteTime++;
-            }
-            this.updateTimerDisplay();
-          }
-        }, 1000);
-      }
-
-      updateTimerDisplay() {
-        const blackTimer = document.getElementById('blackTimer');
-        const whiteTimer = document.getElementById('whiteTimer');
-
-        blackTimer.textContent = this.formatTime(this.game.blackTime);
-        whiteTimer.textContent = this.formatTime(this.game.whiteTime);
-
-        if (this.game.blackTime > 600) blackTimer.classList.add('warning');
-        if (this.game.whiteTime > 600) whiteTimer.classList.add('warning');
-      }
-
-      formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-      }
-
-      undo() {
-        if (this.game.isGameOver) {
-          showToast('对局已结束', 'warning');
-          return;
-        }
-
-        const result = this.game.undo();
-        if (result.success) {
-          this.renderBoard();
-          this.renderCoords();
-
-          this.game.moveHistory.forEach((move, i) => {
-            if (!move.pass) {
-              this.placeStone(move.x, move.y, move.player === 1 ? 'black' : 'white');
-              if (i === this.game.moveHistory.length - 1) {
-                this.markLastMove(move.x, move.y);
-              }
-            }
-          });
-
-          this.updateUI();
-
-          const moveList = document.getElementById('moveList');
-          if (moveList.lastChild) moveList.lastChild.remove();
-
-          showToast('已悔棋', 'info');
-        } else {
-          showToast(result.message, 'warning');
-        }
-      }
-
-      pass() {
-        if (this.game.isGameOver) {
-          showToast('对局已结束', 'warning');
-          return;
-        }
-
-        const result = this.game.pass();
-        if (result.success) {
-          this.updateUI();
-          this.updateMoveList();
-          showToast(`${result.player}停一手`, 'info');
-
-          if (this.game.isGameOver) {
-            this.endGame();
-          }
-        }
-      }
-
-      pause() {
-        if (this.game.isGameOver) return;
-
-        this.game.isPaused = !this.game.isPaused;
-        const btn = document.getElementById('pauseBtn');
-        btn.textContent = this.game.isPaused ? '继续' : '封盘';
-        this.updateUI();
-
-        if (this.game.isPaused) {
-          showToast('对局已封盘', 'info');
-        }
-      }
-
-      resign() {
-        if (this.game.isGameOver) return;
-
-        if (confirm('确定要认输吗？')) {
-          const result = this.game.resign();
-          this.endGame();
-        }
-      }
-
-      endGame() {
-        clearInterval(this.timerInterval);
-
-        const result = this.game.getResult();
-        const gameId = Storage.saveGame(this.game);
-
-        document.getElementById('resultTitle').textContent = '🏁 对局结束';
-        document.getElementById('resultDetails').innerHTML = `
-          <p><strong>${result.winner} 胜！</strong></p>
-          <p>黑方：${result.blackArea} 子（含贴目）</p>
-          <p>白方：${result.whiteArea} 子</p>
-          <p>总手数：${this.game.moveHistory.length} 手</p>
-        `;
-        document.getElementById('resultModal').classList.add('visible');
-
-        const reviewBtn = document.getElementById('reviewBtn');
-        if (gameId) {
-          reviewBtn.href = `review.html?id=${gameId}`;
-        }
-      }
-
       bindEvents() {
-        document.getElementById('goban').addEventListener('click', (e) => {
+        const goban = document.getElementById('goban');
+
+        goban.addEventListener('click', (e) => {
           const intersection = e.target.closest('.intersection');
           if (intersection) {
             const x = parseInt(intersection.dataset.x);
@@ -886,20 +766,40 @@
           }
         });
 
-        document.getElementById('undoBtn').addEventListener('click', () => this.undo());
-        document.getElementById('passBtn').addEventListener('click', () => this.pass());
-        document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
-        document.getElementById('resignBtn').addEventListener('click', () => this.resign());
+        document.getElementById('undoBtn').addEventListener('click', () => this.handleUndo());
+        document.getElementById('passBtn').addEventListener('click', () => this.handlePass());
+        document.getElementById('resignBtn').addEventListener('click', () => this.handleResign());
+        document.getElementById('saveBtn').addEventListener('click', () => this.handleSave());
+        document.getElementById('scoreBtn').addEventListener('click', () => this.handleScore());
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+          switch (e.key) {
+            case 'z':
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                this.handleUndo();
+              }
+              break;
+            case 'p':
+              e.preventDefault();
+              this.handlePass();
+              break;
+            case 's':
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                this.handleSave();
+              }
+              break;
+          }
+        });
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      try {
-        new GameApp();
-      } catch (error) {
-        console.error('游戏初始化失败:', error);
-        showErrorBoundary('游戏加载失败，请刷新页面重试');
-      }
+      new GameApp();
     });
   </script>
 </body>
