@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>复盘 - 围棋对练复盘</title>
+  <meta name="description" content="围棋对局复盘分析，支持AI复盘、手数回放、评分">
+  <meta name="keywords" content="围棋,围棋对弈,围棋学习,死活题,棋谱,AI对弈">
+  <meta name="author" content="围棋对弈复盘">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="复盘 - 围棋对练复盘">
+  <meta property="og:description" content="围棋对局复盘分析，支持AI复盘、手数回放、评分">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="theme-color" content="#C4A35A">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -505,7 +514,10 @@
   </div>
 
   <script src="../js/utils.js"></script>
+  <script src="../js/error-handler.js"></script>
+  <script src="../js/loading.js"></script>
   <script src="../js/storage.js"></script>
+  <script src="../js/board-component.js"></script>
   <script src="../js/game.js"></script>
   <script src="../js/ai.js"></script>
   <script>
@@ -548,13 +560,11 @@
         this.game.blackTime = gameData.blackTime || 0;
         this.game.whiteTime = gameData.whiteTime || 0;
 
-        // Use moveHistory if available, otherwise fall back to moves (backward compatibility)
         const moves = gameData.moveHistory || gameData.moves || [];
         for (const move of moves) {
           if (move.pass || (move.x === -1 && move.y === -1)) {
             this.game.pass();
           } else {
-            // Handle both player number (1/2) and color string ('black'/'white')
             this.game.play(move.x, move.y, move.comment || '');
           }
         }
@@ -761,7 +771,6 @@
           this.moveListRendered = true;
         }
 
-        // 只更新 active 状态
         moveList.querySelectorAll('.move-item').forEach((item, index) => {
           item.classList.toggle('active', index + 1 === this.currentStep);
         });
@@ -821,7 +830,6 @@
         const item = moveList.querySelector(`.move-item[data-index="${moveIndex}"]`);
         if (!item) return;
 
-        // 移除旧的评分显示
         const oldRating = item.querySelector('.move-rating');
         if (oldRating) oldRating.remove();
 

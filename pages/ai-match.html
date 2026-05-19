@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>AI 对弈 - 围棋对弈复盘</title>
+  <meta name="description" content="与AI进行围棋对弈，支持悔棋、停一手、局面分析">
+  <meta name="keywords" content="围棋,围棋对弈,围棋学习,死活题,棋谱,AI对弈">
+  <meta name="author" content="围棋对弈复盘">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="AI 对弈 - 围棋对弈复盘">
+  <meta property="og:description" content="与AI进行围棋对弈，支持悔棋、停一手、局面分析">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="theme-color" content="#C4A35A">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/common.css">
   <style>
@@ -158,7 +167,10 @@
   </div>
 
   <script src="../js/utils.js"></script>
+  <script src="../js/error-handler.js"></script>
+  <script src="../js/loading.js"></script>
   <script src="../js/storage.js"></script>
+  <script src="../js/board-component.js"></script>
   <script src="../js/ai.js"></script>
   <script src="../js/go-engine.js"></script>
   <script src="../js/header.js"></script>
@@ -234,8 +246,8 @@
 
       calculateCellSize() {
         const container = document.querySelector('.board-section');
-        const containerWidth = container ? container.clientWidth - 40 : 300; // Account for padding
-        const maxCell = Math.floor(containerWidth / (this.size + 0.5)); // Add buffer for board padding
+        const containerWidth = container ? container.clientWidth - 40 : 300;
+        const maxCell = Math.floor(containerWidth / (this.size + 0.5));
         return Math.min(Math.max(maxCell, 16), 40);
       }
 
@@ -347,7 +359,6 @@
       handleClick(x, y) {
         if (this.isPaused || !this.isUserTurn) return;
         
-        // Ensure engine's current player is user's color
         if (this.engine.currentPlayer !== this.userColor) {
           this.engine.currentPlayer = this.userColor;
         }
@@ -372,7 +383,6 @@
       makeMove(x, y, color) {
         this.removeLastMoveMarker();
         
-        // Set engine's current player to the color making the move
         const originalPlayer = this.engine.currentPlayer;
         this.engine.currentPlayer = color;
         
@@ -393,7 +403,6 @@
             this.endGame();
           }
         } else {
-          // Restore original player if play failed
           this.engine.currentPlayer = originalPlayer;
         }
       }
@@ -406,7 +415,6 @@
         }
 
         try {
-          // Set engine's current player to AI's color
           this.engine.currentPlayer = this.aiColor;
 
           const move = this.ai.getMove(this.engine, this.aiColor);
@@ -479,7 +487,6 @@
       }
 
       pass() {
-        // Ensure engine's current player is user's color
         if (this.engine.currentPlayer !== this.userColor) {
           this.engine.currentPlayer = this.userColor;
         }
@@ -613,7 +620,6 @@
         try {
           const games = JSON.parse(localStorage.getItem('go_game_history') || '[]');
           const gameId = Date.now();
-          // Convert moveHistory to use player numbers (1 for black, 2 for white) instead of color strings
           const moveHistory = this.moveHistory.map(m => ({
             x: m.x,
             y: m.y,
@@ -630,7 +636,7 @@
             white: white,
             komi: komi,
             totalMoves: this.moveHistory.length,
-            moveHistory: moveHistory, // Use the correct key that review.html expects
+            moveHistory: moveHistory,
             type: 'ai',
             blackPlayer: '你',
             whitePlayer: 'AI'

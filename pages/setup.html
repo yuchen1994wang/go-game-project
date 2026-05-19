@@ -4,140 +4,276 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>开始对弈 - 围棋对练复盘</title>
+  <meta name="description" content="选择棋盘大小和对手，开始新的围棋对局">
+  <meta name="keywords" content="围棋,围棋对弈,围棋学习,死活题,棋谱,AI对弈">
+  <meta name="author" content="围棋对弈复盘">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="开始对弈 - 围棋对练复盘">
+  <meta property="og:description" content="选择棋盘大小和对手，开始新的围棋对局">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="theme-color" content="#C4A35A">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/common.css">
   <style>
-    .setup-page {
-      min-height: 100vh;
+    .setup-page { display: flex; flex-direction: column; min-height: 100vh; }
+
+    header {
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 16px; }
+
+    main {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 40px 24px;
     }
-    .setup-card {
-      max-width: 500px;
+
+    .setup-container {
+      background: var(--panel-bg);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 600px;
       width: 100%;
+      box-shadow: var(--shadow-medium);
+      border: 1px solid var(--border-color);
     }
-    .setup-header {
+
+    .setup-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.8rem;
+      font-weight: 600;
       text-align: center;
       margin-bottom: 32px;
     }
-    .setup-title {
-      font-family: 'Noto Serif SC', serif;
-      font-size: 1.6rem;
-      font-weight: 600;
+
+    .setup-section { margin-bottom: 32px; }
+    .setup-section:last-child { margin-bottom: 0; }
+
+    .section-label {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    .board-size-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .board-size-option {
+      padding: 20px;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      background: var(--bg-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .board-size-option:hover {
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+    }
+
+    .board-size-option.active {
+      border-color: var(--accent-gold);
+      background: var(--accent-gold-light);
+    }
+
+    .size-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .size-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .player-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .player-option {
+      padding: 20px;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      background: var(--bg-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .player-option:hover {
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+    }
+
+    .player-option.active {
+      border-color: var(--accent-gold);
+      background: var(--accent-gold-light);
+    }
+
+    .player-icon {
+      font-size: 2.5rem;
       margin-bottom: 8px;
     }
-    .setup-subtitle {
+
+    .player-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .player-desc {
+      font-size: 0.85rem;
       color: var(--text-secondary);
-      font-size: 0.9rem;
     }
-    .setup-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 32px;
+
+    .start-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+      background: var(--accent-gold);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
     }
-    .setup-actions .btn {
-      flex: 1;
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
     }
+
     @media (max-width: 480px) {
-      .board-size-options {
-        grid-template-columns: repeat(3, 1fr) !important;
-      }
-      .board-size-option {
-        padding: 12px 8px !important;
-      }
-      .size-number {
-        font-size: 1.5rem !important;
-      }
-      .size-label {
-        font-size: 0.8rem !important;
-      }
+      .setup-container { padding: 24px; }
+      .board-size-options { grid-template-columns: repeat(3, 1fr); }
+      .player-options { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="setup-page">
-    <div class="card setup-card">
-      <div class="setup-header">
-        <div style="display: flex; justify-content: flex-end; width: 100%; margin-bottom: 8px;">
+    <header>
+      <div class="header-left">
+        <a href="home.html" class="logo">
+          <div class="logo-icon"></div>
+          <h1>围棋对练</h1>
+        </a>
       </div>
-        <div class="logo-icon" style="margin: 0 auto 16px; width: 50px; height: 50px;"></div>
-        <h2 class="setup-title">开始对弈</h2>
-        <p class="setup-subtitle">选择棋盘大小和对手</p>
-      </div>
+    </header>
 
-      <div class="form-group">
-        <label class="form-label">选择棋盘大小</label>
-        <div class="board-size-options">
-          <button type="button" class="board-size-option" data-size="9">
-            <span class="size-number">9</span>
-            <span class="size-label">路棋盘</span>
-          </button>
-          <button type="button" class="board-size-option" data-size="13">
-            <span class="size-number">13</span>
-            <span class="size-label">路棋盘</span>
-          </button>
-          <button type="button" class="board-size-option active" data-size="19">
-            <span class="size-number">19</span>
-            <span class="size-label">路棋盘</span>
-          </button>
+    <main>
+      <div class="setup-container">
+        <h2 class="setup-title">⚙️ 对局设置</h2>
+
+        <div class="setup-section">
+          <div class="section-label">📐 棋盘大小</div>
+          <div class="board-size-options" id="sizeOptions">
+            <button type="button" class="board-size-option" data-size="9">
+              <span class="size-number">9</span>
+              <span class="size-label">路棋盘</span>
+            </button>
+            <button type="button" class="board-size-option" data-size="13">
+              <span class="size-number">13</span>
+              <span class="size-label">路棋盘</span>
+            </button>
+            <button type="button" class="board-size-option active" data-size="19">
+              <span class="size-number">19</span>
+              <span class="size-label">路棋盘</span>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label class="form-label">黑方选手</label>
-        <div class="player-input-group">
-          <span class="player-indicator black"></span>
-          <input type="text" id="blackPlayer" placeholder="输入黑方名称" maxlength="10">
+        <div class="setup-section">
+          <div class="section-label">👥 对局模式</div>
+          <div class="player-options" id="playerOptions">
+            <button type="button" class="player-option active" data-mode="pvp">
+              <div class="player-icon">👤👤</div>
+              <div class="player-name">人人对弈</div>
+              <div class="player-desc">两位玩家对局</div>
+            </button>
+            <button type="button" class="player-option" data-mode="pve">
+              <div class="player-icon">👤🤖</div>
+              <div class="player-name">人机对弈</div>
+              <div class="player-desc">与 AI 对局</div>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label class="form-label">白方选手</label>
-        <div class="player-input-group">
-          <span class="player-indicator white"></span>
-          <input type="text" id="whitePlayer" placeholder="输入白方名称" maxlength="10">
-        </div>
+        <button class="start-btn" id="startBtn">开始对弈</button>
       </div>
-
-      <div class="setup-actions">
-        <a href="home.html" class="btn btn-secondary">取消</a>
-        <button type="button" class="btn btn-primary" id="startGameBtn">开始游戏</button>
-      </div>
-    </div>
+    </main>
   </div>
 
   <script src="../js/utils.js"></script>
+  <script src="../js/error-handler.js"></script>
+  <script src="../js/loading.js"></script>
   <script src="../js/storage.js"></script>
+  <script src="../js/board-component.js"></script>
+  <script src="../js/header.js"></script>
   <script>
-    // 初始化主题
-    ThemeManager.init();
+    class SetupApp {
+      constructor() {
+        this.selectedSize = 19;
+        this.selectedMode = 'pvp';
+        this.init();
+      }
 
-    // 棋盘大小选择
-    document.querySelectorAll('.board-size-option').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.board-size-option').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
+      init() {
+        this.bindEvents();
+      }
 
-    // 开始游戏
-    document.getElementById('startGameBtn').addEventListener('click', () => {
-      const size = parseInt(document.querySelector('.board-size-option.active').dataset.size);
-      const blackPlayer = document.getElementById('blackPlayer').value.trim();
-      const whitePlayer = document.getElementById('whitePlayer').value.trim();
+      bindEvents() {
+        document.querySelectorAll('#sizeOptions .board-size-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('#sizeOptions .board-size-option').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.selectedSize = parseInt(btn.dataset.size);
+          });
+        });
 
-      // 保存游戏设置到 sessionStorage
-      sessionStorage.setItem('go_game_settings', JSON.stringify({
-        size,
-        blackPlayer: blackPlayer || '黑方',
-        whitePlayer: whitePlayer || '白方'
-      }));
+        document.querySelectorAll('#playerOptions .player-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('#playerOptions .player-option').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.selectedMode = btn.dataset.mode;
+          });
+        });
 
-      window.location.href = 'game.html';
+        document.getElementById('startBtn').addEventListener('click', () => {
+          if (this.selectedMode === 'pve') {
+            window.location.href = `ai-setup.html?size=${this.selectedSize}`;
+          } else {
+            window.location.href = `game.html?size=${this.selectedSize}&black=黑方&white=白方`;
+          }
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      new SetupApp();
     });
   </script>
 </body>
