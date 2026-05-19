@@ -37,22 +37,19 @@
 
       <div class="setup-section">
         <div class="section-title">📐 棋盘大小</div>
-        <div class="option-grid" id="sizeOptions">
-          <div class="option-card" data-size="9">
-            <div class="option-icon">9️⃣</div>
-            <div class="option-label">9路</div>
-            <div class="option-desc">快速对局</div>
-          </div>
-          <div class="option-card" data-size="13">
-            <div class="option-icon">1️⃣3️⃣</div>
-            <div class="option-label">13路</div>
-            <div class="option-desc">标准练习</div>
-          </div>
-          <div class="option-card selected" data-size="19">
-            <div class="option-icon">1️⃣9️⃣</div>
-            <div class="option-label">19路</div>
-            <div class="option-desc">完整对局</div>
-          </div>
+        <div class="board-size-options" id="sizeOptions">
+          <button type="button" class="board-size-option" data-size="9">
+            <span class="size-number">9</span>
+            <span class="size-label">路棋盘</span>
+          </button>
+          <button type="button" class="board-size-option" data-size="13">
+            <span class="size-number">13</span>
+            <span class="size-label">路棋盘</span>
+          </button>
+          <button type="button" class="board-size-option active" data-size="19">
+            <span class="size-number">19</span>
+            <span class="size-label">路棋盘</span>
+          </button>
         </div>
       </div>
 
@@ -103,11 +100,11 @@
       }
 
       bindEvents() {
-        document.querySelectorAll('#sizeOptions .option-card').forEach(card => {
-          card.addEventListener('click', () => {
-            document.querySelectorAll('#sizeOptions .option-card').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            this.selectedSize = parseInt(card.dataset.size);
+        document.querySelectorAll('#sizeOptions .board-size-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('#sizeOptions .board-size-option').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.selectedSize = parseInt(btn.dataset.size);
           });
         });
 
